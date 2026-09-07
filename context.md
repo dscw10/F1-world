@@ -621,6 +621,7 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | `public/.nojekyll` committed deliberately | Pages runs Jekyll, Jekyll ignores directories starting with an underscore, and Next puts everything in `_next`. Same symptom as the base-path bug, different cause, equally silent |
 | 2026-09-07 | Token values are placeholders, structured to Chris's system but not taken from it | The ramp shape, the 8-hue categorical palette, the sequential ramp, the 16px floor and the mono telemetry stack all follow what the archive records. The numbers are mine and are marked as such on the page. One edit to `styles/tokens.css` replaces them everywhere |
 | 2026-09-07 | The first page is scaffolding and says so on itself | It renders the tokens so WP3 has a feedback loop, and states the project status. A placeholder that looks finished invites the wrong conversation |
+| 2026-09-07 | Enabling GitHub Pages cannot be automated from the workflow — tried and rejected | `configure-pages` accepts `enablement: true`, but with the workflow's own token it fails with "Create Pages site failed. Resource not accessible by integration". Removed rather than left in, so the log carries one clear error instead of two. Recorded so it is not retried |
 
 ---
 

@@ -24,20 +24,33 @@ push to branch
 
 ---
 
-## Enabling Pages
+## Enabling Pages — one manual step, and it cannot be automated
 
-The workflow tries to switch Pages on itself (`enablement: true` on
-`configure-pages`), so there should be nothing to do.
-
-**If a run fails with `Get Pages site failed ... Not Found`,** the token was not
-permitted to enable it and it needs doing once by hand:
+**Chris needs to do this once, in the browser:**
 
 1. Repository on GitHub → **Settings** → **Pages**
 2. Under **Source**, choose **GitHub Actions** (not "Deploy from a branch")
-3. Save, then re-run the workflow from the **Actions** tab
+3. Save
+4. Go to the **Actions** tab, open the most recent run, and press
+   **Re-run all jobs**
 
-That error is the expected symptom of Pages being off — not a broken workflow.
-Everything before it (install, type check, build) will have passed.
+Until that is done, every run fails at the `configure-pages` step with
+`Get Pages site failed ... Not Found`. **That is the expected symptom of Pages
+being switched off, not a broken workflow** — everything before it (install,
+type check, build) passes, and the build output is fine.
+
+**This was tried automatically and does not work.** `configure-pages` accepts
+`enablement: true`, which is meant to switch Pages on. With the workflow's own
+token it fails:
+
+```
+Create Pages site failed.
+Error: Resource not accessible by integration
+```
+
+The token is not permitted to create a Pages site for the repository. The option
+has been removed from the workflow so it does not add a second, more alarming
+error to the log. **Do not re-add it.**
 
 ---
 
