@@ -61,6 +61,64 @@ CORNER_NAMES: dict[str, dict[int, str]] = {
 # Session time origin — the bug family, resolved once
 # ---------------------------------------------------------------------------
 
+def assert_loaded(session, year, gp, ident) -> None:
+    """Refuse to continue with a session that did not actually load.
+
+    `Session.load()` does NOT raise when its fetches fail. It logs a wall of
+    warnings and returns normally, leaving an empty session behind — verified
+    here by running with no network route: every fetch failed and load()
+    reported success. What happens next is either an opaque FastF1 traceback
+    four steps later, or worse, a partial export that looks like a real race.
+
+    This is the failure mode this project keeps recording: a plausible wrong
+    answer rather than an error. So the load is checked before anything is
+    built on it.
+    """
+    import pandas as pd
+
+    # Every one of these is a PROPERTY that RAISES when the session did not
+    # load — `getattr(..., None)` does not help, because DataNotLoadedError is
+    # not an AttributeError. Each access has to be guarded individually.
+    problems = []
+
+    try:
+        if len(session.laps) == 0:
+            problems.append("no lap data")
+    except Exception:
+        problems.append("no lap data")
+
+    try:
+        if not len(session.drivers):
+            problems.append("no drivers")
+    except Exception:
+        problems.append("no drivers")
+
+    try:
+        t0 = session.t0_date
+        if t0 is None or pd.isna(t0):
+            problems.append("no session start time")
+    except Exception:
+        problems.append("no session start time")
+
+    if not problems:
+        return
+
+    raise SystemExit(
+        f"\nThe session loaded but is empty ({', '.join(problems)}).\n\n"
+        f"Nothing has been written. Exporting from a half-loaded session "
+        f"would produce a file that looks like a race and is not one.\n\n"
+        f"FastF1 does not raise when its downloads fail — it warns and carries "
+        f"on — so the warnings above are the real error. Likely causes:\n\n"
+        f"  * No route to F1's timing servers from this machine.\n"
+        f"  * '{gp}' is not a Grand Prix in {year}. Try the country "
+        f"(Belgium, Monaco) or the round number.\n"
+        f"  * '{ident}' is not a session of that event. Use R, Q, S, "
+        f"FP1, FP2 or FP3.\n"
+        f"  * The session is too recent, or too old — FastF1 covers 2018 "
+        f"onwards.\n"
+    )
+
+
 def resolve_origin(session):
     """Return the wall-clock instant that session time t = 0 refers to.
 
@@ -208,7 +266,7 @@ def _str_or_none(v):
     return str(v)
 
 
-def extract_frames(session, origin_offset, drivers) -> list[dict]:
+def extract_frames(session, origin_offset, drivers, max_hz: float = 0.0) -> list[dict]:
     """Position and telemetry per driver, as parallel arrays.
 
     `get_telemetry()` is called ONCE PER DRIVER, never per lap. The August
@@ -255,6 +313,24 @@ def extract_frames(session, origin_offset, drivers) -> list[dict]:
         if not t:
             continue
         order = sorted(range(len(t)), key=lambda i: t[i])
+
+        # Decimate. Position data arrives around 3.7 Hz and the merged
+        # telemetry can be far denser; the app interpolates between samples, so
+        # past a few hertz the extra rows cost download size and buy nothing
+        # visible. Keeps the FIRST sample in each time bucket rather than
+        # averaging, because averaging position across a corner cuts it.
+        if max_hz and max_hz > 0:
+            min_gap = 1000.0 / max_hz
+            kept, last_t = [], None
+            for i in order:
+                if last_t is None or (t[i] - last_t) >= min_gap:
+                    kept.append(i)
+                    last_t = t[i]
+            # Always keep the final sample: it is where the car finished.
+            if order and kept and kept[-1] != order[-1]:
+                kept.append(order[-1])
+            order = kept
+
         pick = lambda arr: [arr[i] for i in order]  # noqa: E731
         frames.append({
             "driver": code,
@@ -262,7 +338,7 @@ def extract_frames(session, origin_offset, drivers) -> list[dict]:
             "speed": pick(speed), "throttle": pick(throttle),
             "brake": pick(brake), "gear": pick(gear), "distance": pick(dist),
         })
-        print(f"  {code}: {len(t)} samples")
+        print(f"  {code}: {len(pick(t))} samples")
     return frames
 
 
@@ -386,6 +462,11 @@ def main() -> int:
     p.add_argument("--session", default="R", help="R, Q, FP1 ... (default R)")
     p.add_argument("--verify", action="store_true",
                    help="print the verification report in full")
+    p.add_argument("--max-hz", type=float, default=4.0,
+                   help="decimate telemetry to at most this many samples per "
+                        "second per driver (default 4). The app interpolates "
+                        "between samples, so a higher rate costs download size "
+                        "without looking any smoother. 0 disables decimation.")
     p.add_argument("--out", type=Path, default=OUT_ROOT)
     args = p.parse_args()
 
@@ -397,6 +478,7 @@ def main() -> int:
     print(f"Loading {args.year} {args.gp} {args.session} ...")
     session = fastf1.get_session(args.year, args.gp, args.session)
     session.load(laps=True, telemetry=True, weather=False, messages=True)
+    assert_loaded(session, args.year, args.gp, args.session)
 
     origin, origin_offset = resolve_origin(session)
     cid = circuit_id(session)
@@ -416,7 +498,7 @@ def main() -> int:
           f"{len(circuit['corners'])} corners")
 
     print("Telemetry ...")
-    frames = extract_frames(session, origin_offset, drivers)
+    frames = extract_frames(session, origin_offset, drivers, args.max_hz)
 
     duration = max((l["startMs"] + (l["timeMs"] or 0)) for l in laps) if laps else 0
 
@@ -452,8 +534,11 @@ def main() -> int:
     ):
         path = out / name
         path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
-        print(f"  wrote {path.relative_to(Path.cwd()) if path.is_relative_to(Path.cwd()) else path}"
-              f" ({path.stat().st_size / 1_000_000:.1f} MB)")
+        print(f"  wrote {path.name} ({path.stat().st_size / 1_000_000:.1f} MB)")
+
+    label = f"{args.year} {manifest['eventName']}"
+    schema.update_index(args.out, cid, label, synthetic=False, make_default=True)
+    print(f"  registered '{cid}' in {schema.INDEX} and made it the default")
 
     print("\nVerification")
     for c in report["checks"]:

@@ -27,8 +27,9 @@ There is no paid tier, no accounts, and nothing generative. Dropped 2026-09-07.
 
 **Status: WP1-WP6 built.** Pipeline, windowed replay, analytics, dashboard and
 explorer all run against a synthetic fixture. The real export has never been
-run — this sandbox has no network route to F1's servers, so `pipeline/README.md`
-explains what Chris has to run locally.
+run — this sandbox has no network route to F1's servers. It runs as a GitHub
+Action instead (Actions → "Export a race"), needing no local machine; see
+`docs/06-exporting-from-an-ipad.md`.
 
 ## Working with me
 
@@ -128,7 +129,7 @@ to build WP1–WP8.
 /server        Later. Poller and fan-out for live. Not needed yet.
 /docs          Specification. 01 = source licensing, 02 = broadcast sync,
                03 = device targets, 04 = replay and reveal,
-               05 = build and deploy.
+               05 = build and deploy, 06 = exporting from an iPad.
 /docs/archive  Superseded material. History, not instruction.
 ```
 

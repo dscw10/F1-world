@@ -17,6 +17,13 @@ import { SCHEMA_VERSION, type SessionData } from './types';
  */
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
+/** What sessions exist, and which one to open. Written by the pipeline. */
+export interface SessionIndex {
+  /** Session id to open by default. Null when nothing has been exported. */
+  default: string | null;
+  sessions: { id: string; label: string; synthetic: boolean }[];
+}
+
 export class SessionLoadError extends Error {
   constructor(message: string, readonly cause_?: unknown) {
     super(message);
@@ -40,6 +47,18 @@ async function getJson<T>(path: string): Promise<T> {
   } catch (err) {
     throw new SessionLoadError(`${url} was not valid JSON`, err);
   }
+}
+
+/**
+ * What has been exported.
+ *
+ * Read at runtime rather than baked in, so adding a race is a data change. That
+ * matters more than it sounds: it means the export can be run by a GitHub
+ * Action that commits its output, with no source edit — which is what makes it
+ * possible to add a race from an iPad.
+ */
+export async function loadIndex(): Promise<SessionIndex> {
+  return getJson<SessionIndex>('/data/index.json');
 }
 
 /**

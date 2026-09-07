@@ -14,6 +14,15 @@ That is a meaningful gap and it is stated rather than glossed over. The August
 build hit the same wall and recorded it. Expect the first real run to surface
 something; that is what `--verify` is for.
 
+## The easy way: run it on GitHub
+
+You do not need any of the setup below. **Actions → "Export a race" → "Run
+workflow"** runs this pipeline on a GitHub runner and commits the result. It
+works from any browser, including on an iPad. See
+`docs/06-exporting-from-an-ipad.md`.
+
+The rest of this page is for running it locally.
+
 ## Setup
 
 Needs Python 3.11 or newer.
@@ -39,8 +48,10 @@ The first run downloads from the F1 archive and takes several minutes. It caches
 into `pipeline/cache/`, so later runs are fast. That folder is git-ignored — it
 is large and entirely reproducible.
 
-Output goes to `public/data/<circuit-id>/`. Then point the app at it by changing
-the session id in `app/page.tsx`.
+Output goes to `public/data/<circuit-id>/`, and the export registers itself in
+`public/data/index.json` as the new default. **No source edit is needed** — the
+app reads that index at runtime, which is what lets the whole thing run as a
+GitHub Action.
 
 ### It checks itself, and it will tell you if it failed
 

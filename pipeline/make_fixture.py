@@ -383,6 +383,11 @@ def main() -> int:
         path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
         print(f"  {name:16} {path.stat().st_size / 1024:8.1f} KB")
 
+    # Register, but never steal the default from a real race: the fixture is
+    # what you fall back to, not what you open when real data exists.
+    schema.update_index(OUT.parent, "fixture", "Development Fixture",
+                        synthetic=True, make_default=False)
+
     total = sum(len(f["t"]) for f in frames)
     print(f"\n{len(manifest['drivers'])} drivers, {LAPS} laps, "
           f"{len(laps)} lap records, {total} samples, "

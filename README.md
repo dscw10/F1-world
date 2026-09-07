@@ -19,9 +19,10 @@ A race plays in real time. The order, gaps, tyres and pace all update as it
 runs, and nothing later than the clock is reachable. Reach the flag and the
 explorer opens, where you can ask your own questions of the race.
 
-**Every figure is invented.** The page says so. This sandbox has no network
-route to F1's servers, so the data is a synthetic fixture and the real export
-has never been run — see `pipeline/README.md` for what that takes.
+**Every figure is invented.** The page says so. To replace it with a real race,
+open the **Actions** tab → **Export a race** → **Run workflow**. It runs the
+pipeline on GitHub's servers and commits the result, so it works from any
+device including an iPad. See `docs/06-exporting-from-an-ipad.md`.
 
 `/foundations` shows the design token set on a real screen.
 
@@ -61,6 +62,7 @@ Pages is enabled with **Source: GitHub Actions**; see
 | `docs/03-device-targets.md` | Tablet first, then laptop, then phone — and what that rules out |
 | `docs/04-replay-and-reveal.md` | Archive-first, windowed replay, and why that order de-risks live |
 | `docs/05-build-and-deploy.md` | How the site builds and publishes, and two failure modes designed out |
+| `docs/06-exporting-from-an-ipad.md` | Running the export from GitHub, with no computer |
 | `pipeline/README.md` | How to export a real race, and what the export refuses to publish |
 | `docs/archive/2026-08-build-log.md` | The abandoned build's log, verbatim. History, not instruction — it describes Cesium, a weather layer and a post-race framing, all of which are superseded |
 

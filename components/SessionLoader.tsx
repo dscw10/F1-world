@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from 'react';
 import type { SessionData } from '@/lib/types';
-import { loadSession, SessionLoadError } from '@/lib/data';
+import { loadIndex, loadSession, SessionLoadError } from '@/lib/data';
 import { Dashboard } from './Dashboard';
 import styles from './dashboard.module.css';
 
@@ -20,13 +20,29 @@ type State =
   | { status: 'ready'; data: SessionData }
   | { status: 'error'; message: string };
 
-export function SessionLoader({ sessionId }: { sessionId: string }) {
+export function SessionLoader({ sessionId }: { sessionId?: string }) {
   const [state, setState] = useState<State>({ status: 'loading' });
 
   useEffect(() => {
     let cancelled = false;
     setState({ status: 'loading' });
-    loadSession(sessionId)
+
+    // Which race to open comes from the index the pipeline writes, so a new
+    // export appears without a code change. An explicit `sessionId` overrides
+    // it, which is what a per-race URL will use later.
+    (async () => {
+      let id = sessionId;
+      if (!id) {
+        const index = await loadIndex();
+        if (!index.default) {
+          throw new SessionLoadError(
+            'No sessions have been exported yet.',
+          );
+        }
+        id = index.default;
+      }
+      return loadSession(id);
+    })()
       .then((data) => { if (!cancelled) setState({ status: 'ready', data }); })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -59,8 +75,8 @@ export function SessionLoader({ sessionId }: { sessionId: string }) {
           </p>
           <p className={styles.errorDetail}>{state.message}</p>
           <p className={styles.errorDetail}>
-            Run <code>npm run fixture</code> for the development fixture, or{' '}
-            <code>python pipeline/export_session.py</code> for a real race.
+            Run the <strong>Export a race</strong> workflow on GitHub, or{' '}
+            <code>npm run fixture</code> locally for the development fixture.
           </p>
         </div>
       </div>

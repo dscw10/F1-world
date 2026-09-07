@@ -1,0 +1,10 @@
+{
+  "default": "fixture",
+  "sessions": [
+    {
+      "id": "fixture",
+      "label": "Development Fixture",
+      "synthetic": true
+    }
+  ]
+}

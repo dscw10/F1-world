@@ -3,14 +3,11 @@ import { SessionLoader } from '@/components/SessionLoader';
 /**
  * The dashboard.
  *
- * A server component that renders the client shell. The session is fetched in
- * the browser rather than baked in at build time, so swapping which race is
- * shown is a data change rather than a rebuild — and so the same page will
- * serve a live transport later without restructuring.
- *
- * `fixture` is the synthetic development session. Replace with the exported
- * circuit id (`spa`, and so on) once a real export exists.
+ * A server component that renders the client shell. Which race it opens comes
+ * from `public/data/index.json`, written by the pipeline — so exporting a new
+ * race changes what is shown without touching any source. That is what lets
+ * the export run as a GitHub Action and still reach the screen.
  */
 export default function Page() {
-  return <SessionLoader sessionId="fixture" />;
+  return <SessionLoader />;
 }

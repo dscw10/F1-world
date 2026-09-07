@@ -53,3 +53,48 @@ def num(value, digits: int = 2):
     if value is None or pd.isna(value):
         return None
     return round(float(value), digits)
+
+
+# ---------------------------------------------------------------------------
+# The session index
+# ---------------------------------------------------------------------------
+
+INDEX = "index.json"
+
+
+def update_index(data_root, session_id: str, label: str, synthetic: bool,
+                 make_default: bool = True) -> dict:
+    """Register a session in public/data/index.json.
+
+    The app reads this to find out what exists and which race to open. Without
+    it, adding a race would mean editing `app/page.tsx` — which is fine from a
+    laptop and impossible from the GitHub website on an iPad.
+    """
+    import json
+    from pathlib import Path
+
+    path = Path(data_root) / INDEX
+    index = {"default": None, "sessions": []}
+    if path.exists():
+        try:
+            index = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            pass  # a corrupt index is rebuilt rather than inherited
+
+    sessions = [s for s in index.get("sessions", []) if s.get("id") != session_id]
+    sessions.append({"id": session_id, "label": label, "synthetic": synthetic})
+    # Real sessions first, then alphabetical, so the fixture sinks to the
+    # bottom once a real race exists.
+    sessions.sort(key=lambda s: (s["synthetic"], s["label"]))
+
+    default = index.get("default")
+    if make_default or default is None:
+        default = session_id
+    # Never leave the app pointing at a session that is no longer listed.
+    if default not in {s["id"] for s in sessions}:
+        default = sessions[0]["id"] if sessions else None
+
+    out = {"default": default, "sessions": sessions}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    return out

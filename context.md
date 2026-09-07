@@ -4,7 +4,8 @@
 **Status:** WP1–WP6 built and deploying to https://dscw10.github.io/F1-world/ .
 Pipeline, windowed replay, analytics, dashboard and explorer all run — against
 a synthetic fixture, because this sandbox has no network route to F1's servers.
-The real export has never been run; see `pipeline/README.md`.
+**The real export runs as a GitHub Action** (Actions → "Export a race"), which
+needs no local machine at all; see `docs/06-exporting-from-an-ipad.md`.
 **Last updated:** 7 September 2026
 
 **Purpose of this file:** the single source of truth for what this project is,
@@ -633,6 +634,12 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | The clock treats a long frame gap as a pause, not a fast-forward | A tablet propped beside a television locks itself. Advancing by the elapsed wall time on wake would skip however long it slept — on a two-hour session, most of the race |
 | 2026-09-07 | Playwright is not a dependency | It is genuinely useful for looking at the thing being built, and it would add a browser download to every CI run for something only used by hand. Installed ad hoc; `scripts/shot.mjs` says how |
 | 2026-09-07 | The explorer opens only at the flag | It belongs to Dig. While the race plays, "the median lap on hards" has an answer that changes under you; at the flag it is settled. This is the reveal rule made visible |
+| 2026-09-07 | **The export runs as a GitHub Action, so a race can be added from an iPad** | The pipeline needs Python, scipy and a route to F1's archive; an iPad has none and cannot get them. A runner is a full Linux machine reachable from any browser, so it does the work and commits the result. It also solves the sandbox's own lack of a route. See `docs/06-exporting-from-an-ipad.md` |
+| 2026-09-07 | The app reads `public/data/index.json` rather than a hardcoded session id | Adding a race is now a data change, not a source edit — which is the whole reason the Action can produce something that reaches the screen without anyone opening an editor. The newest real export becomes the default; the fixture always sorts last |
+| 2026-09-07 | **`Session.load()` does not raise when its downloads fail** | Verified by running the export with no network: every fetch failed, FastF1 logged warnings, and `load()` returned normally with an empty session. Left alone that gives a confusing traceback several steps later, or a partial export that looks like a real race. The pipeline now refuses before building anything on it, and names the likely causes |
+| 2026-09-07 | `getattr(session, "laps", None)` does not guard a FastF1 property | The property *raises* `DataNotLoadedError`, which is not an `AttributeError`, so the default is never returned. Each access needs its own try. Found while testing the gate above — the first version of it crashed in the same way it was written to prevent |
+| 2026-09-07 | Telemetry is decimated to 4 Hz on export, and the rate is an input rather than a constant | The app interpolates with a spline, so a higher sample rate costs download size without looking smoother. It is the one knob trading size against fidelity, so it is exposed as a decision |
+| 2026-09-07 | A failed verification gate still commits, with the failure attached | Refusing to publish hides the finding; publishing quietly misleads. Publishing with the failure recorded in the manifest, and shown on screen, is the honest middle and matches the rest of the project |
 | 2026-09-07 | **The published site deploys from `main`; working branches build but do not publish** | Chris's call. The `github-pages` environment restricts deployments to the default branch, which is separate from the Pages source setting and defaults on. Deploying from a working branch is rejected *before the job starts* — it waits, fails in about a second, and returns 404 for its logs because it never ran, so there is no error to find. An `if:` on the deploy job makes that state unreachable by accident, while the build and verification still run on every branch |
 
 ---
