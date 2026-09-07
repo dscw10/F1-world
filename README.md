@@ -41,10 +41,9 @@ npm run dev          # http://localhost:3000
 | `npm run build` | Production build into `./out` |
 | `npm run typecheck` | Type check without building |
 
-**One-time setup for deploys:** in GitHub → Settings → Pages, set **Source** to
-**GitHub Actions**. Until that is done the deploy step fails with a permissions
-error, which is expected rather than broken. Full detail in
-`docs/05-build-and-deploy.md`.
+Deploys happen automatically on every push to the development branch. GitHub
+Pages is enabled with **Source: GitHub Actions**; see
+`docs/05-build-and-deploy.md` if a run ever fails at the Pages step.
 
 ## Where things are
 

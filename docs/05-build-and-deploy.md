@@ -1,7 +1,7 @@
 # Build and deploy
 
 **Written:** 2026-09-07
-**Status:** working. Verified locally, both with and without the base path.
+**Status:** working. Pages enabled 2026-09-07; deploying from the branch.
 
 ## The setup
 
@@ -24,20 +24,16 @@ push to branch
 
 ---
 
-## Enabling Pages — one manual step, and it cannot be automated
+## Enabling Pages — done 2026-09-07
 
-**Chris needs to do this once, in the browser:**
+Chris set **Settings → Pages → Source** to **GitHub Actions**. Nothing further
+is needed; this section is kept because the failure it describes is
+unrecognisable if you have not seen it before.
 
-1. Repository on GitHub → **Settings** → **Pages**
-2. Under **Source**, choose **GitHub Actions** (not "Deploy from a branch")
-3. Save
-4. Go to the **Actions** tab, open the most recent run, and press
-   **Re-run all jobs**
-
-Until that is done, every run fails at the `configure-pages` step with
-`Get Pages site failed ... Not Found`. **That is the expected symptom of Pages
-being switched off, not a broken workflow** — everything before it (install,
-type check, build) passes, and the build output is fine.
+**The symptom, if Pages is ever switched off again:** every run fails at the
+`configure-pages` step with `Get Pages site failed ... Not Found`. Everything
+before it — install, type check, build, output verification — passes, and the
+built files are fine. It is not a broken workflow; it is a repository setting.
 
 **This was tried automatically and does not work.** `configure-pages` accepts
 `enablement: true`, which is meant to switch Pages on. With the workflow's own
