@@ -25,6 +25,7 @@ not exist in this repository.
 | `CLAUDE.md` | Project instructions, read automatically by Claude Code |
 | `docs/01-live-source-licensing.md` | Which data sources exist and what each licence permits. Mostly resolved by dropping the paid tier — read its header |
 | `docs/02-broadcast-sync.md` | Time, delay, and the three clock modes |
+| `docs/03-device-targets.md` | Tablet first, then laptop, then phone — and what that rules out |
 | `docs/archive/2026-08-build-log.md` | The abandoned build's log, verbatim. History, not instruction — it describes Cesium, a weather layer and a post-race framing, all of which are superseded |
 
 The findings worth keeping from that archive are carried forward, curated, into
@@ -39,9 +40,10 @@ supporting role. Broadcast delay is handled by three clock modes, defaulting to
 the live edge, with a broadcast-sync mode that replays a finished race in step
 with the viewer's own screen.
 
-**Open, and top of the list:** whether phone is the primary target. "Second
-screen during a race" describes a phone, and it inverts most layout decisions,
-so it wants settling before any UI work.
+Also decided: **tablet first, then laptop, then phone** — a propped tablet in
+landscape is the second-screen posture. That rules out hover as a way of
+carrying meaning, since the primary device has no pointer, and it makes the
+two-hour session length a real design problem rather than an optimisation.
 
 One thing to know early: because the upstream free tier is a few requests per
 second, browsers cannot talk to it directly. A small always-on server polls once

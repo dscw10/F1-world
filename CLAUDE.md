@@ -60,6 +60,16 @@ I am a UX/HMI specialist, not a developer. Therefore:
   `context.md` §5.2.
 - **Reliability outranks polish.** The feed will drop mid-race. What the
   interface does in that moment matters more than any transition.
+- **Tablet first, then laptop, then phone.** A propped tablet in landscape is
+  the design target. Tablet and laptop share one layout; the phone is a reduced
+  product, not the same layout squeezed. See `docs/03-device-targets.md`.
+- **Hover never carries meaning.** The primary device has no pointer. No
+  value-bearing tooltips, no reveal-on-hover controls. Values live in a
+  permanent readout that updates on tap and holds its space when empty.
+  Minimum 44 px touch targets everywhere, laptop included.
+- **The session is two hours long.** Stop rendering when not visible, bound
+  anything that accumulates, and handle the device going to sleep — reconnect,
+  re-sync the clock, backfill visibly. This is the most likely real failure.
 - **The analytics layer must not know which transport fed it.** Live and archive
   data normalise to one model. An analytic that reads the live feed directly is
   a bug.
@@ -97,7 +107,8 @@ a small always-on server for polling and fan-out.
 /components    React. /scene is the Three.js scene; /ui is DOM chrome.
 /lib           types.ts (the data contract), analytics, explorer, interpolation.
 /styles        Design tokens, mirrored from Chris's Figma design system.
-/docs          Specification. 01 = source licensing, 02 = broadcast sync.
+/docs          Specification. 01 = source licensing, 02 = broadcast sync,
+               03 = device targets.
 /docs/archive  Superseded material. History, not instruction.
 ```
 

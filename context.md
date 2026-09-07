@@ -142,7 +142,7 @@ most likely to be under-served while the explorer gets the attention.
 - The explorer — viewer-built queries over the available measures
 - Post-race and broadcast-sync modes on the same data model
 - 3D circuit: racing line, real elevation, segment colouring — supporting role
-- **Phone support** (see §8 — recommended as primary, not yet ratified)
+- **Tablet first, then laptop, then phone** — see §4b and `docs/03-device-targets.md`
 - **Graceful degradation when the feed drops.** Not a polish item
 - Onboarding sufficient for a stranger, including the delay setting
 - Chris's design system, applied throughout
@@ -163,6 +163,40 @@ most likely to be under-served while the explorer gets the attention.
 - A generated/forecast layer, if the measured product earns it
 - Season-wide and multi-race comparison
 - Additional circuits
+
+## 4b. Device targets — decided
+
+**Tablet → laptop → phone.** Decided 2026-09-07 (Chris). Detail in
+`docs/03-device-targets.md`.
+
+A propped-up tablet in landscape, beside the television, is the real
+second-screen posture. Tablet and laptop are near-neighbours (~1024–1440 logical
+px, landscape) and share one layout. **The phone is the outlier** and is treated
+as a reduced product rather than the same layout squeezed.
+
+Three consequences that are not obvious:
+
+**1. Hover is gone.** The primary device has no pointer. Nothing may depend on
+hover — no tooltips carrying values, no reveal-on-hover controls. This
+contradicts an inherited finding ("the hover target is the column, not the
+mark"), whose insight survives and whose mechanism does not: the target is still
+far larger than the mark, but sized for a fingertip, and **the value readout is
+permanent rather than summoned**. A tooltip has no good touch equivalent, so the
+reading occupies fixed space in the layout and updates on tap. That costs space a
+tooltip does not — which is part of why the phone is reduced.
+
+**2. A race is two hours.** An unusually long session for a web page, and it
+surfaces problems a short one never does: thermal throttling and battery drain
+from sustained WebGL, unbounded memory growth that appears ninety minutes in, and
+— most likely of all — **the device going to sleep**. A tablet propped beside a
+television locks itself; on wake the connection is dead and the clock has
+drifted. This happens to every user, not a few, and at exactly the moment they
+look back at the screen. Reconnect, re-sync, backfill, visibly.
+
+**3. The phone is a glance device.** Of §3's three moments it serves Glance
+fully, Question partially, and Dig not at all. The explorer and the 3D scene need
+room to be usable, and fitting them onto a phone would cost the tablet layout
+that most people will actually use.
 
 ---
 
@@ -321,10 +355,6 @@ public tool, an unfamiliar convention is a bounce.
 
 **Blocking, and top of the list:**
 
-- [ ] **Is phone the primary target?** Recommended: yes. "Second screen during a
-      race" describes a phone, and the success criterion is now real people
-      using it during real races. This inverts most layout decisions, so it
-      should be settled before any UI work. Chris's call
 - [ ] **Where does the server run, and what does it cost?** §5.2 makes an
       always-on process mandatory. A free tool with a monthly bill needs that
       bill to be small and known in advance
@@ -339,6 +369,7 @@ public tool, an unfamiliar convention is a bounce.
       above. Non-commercial use is what its CC BY-NC-SA licence permits, and it
       carries the telemetry the product needs
 - [x] ~~The broadcast-delay stance~~ — three modes, live edge default. §5.3
+- [x] ~~Which device is primary~~ — **tablet, then laptop, then phone.** §4b
 
 **Still open:**
 
@@ -351,6 +382,10 @@ public tool, an unfamiliar convention is a bounce.
       one-stop that leads at the flag, a disqualification
 - [ ] Whether the explorer's query lattice is right for a live context, where
       data is arriving rather than complete
+- [ ] Whether the phone gets a genuinely different, simpler screen or the same
+      one with sections collapsed. The first is better and costs more
+- [ ] Tablet portrait: recommended as the landscape panels stacked in priority
+      order, not a distinct design. Unsettled
 - [ ] Whether ShareAlike attaches if exported data is committed to the repo.
       Querying an API is not obviously "Adapted Material"; shipping their data
       might be. Worth an hour before committing any cached export
@@ -396,7 +431,7 @@ altitude is more accurate than any public elevation model.
 | **WP6** | 3D circuit: racing line, elevation, segment colour | Recognisable, every metre addressable |
 | **WP7** | Server: poller, fan-out, cache, delay buffer | Many browsers served from one upstream connection; a dropped upstream reconnects and the UI says so |
 | **WP8** | Live transport behind the same model | Runs live with no analytics change, degrades visibly when the feed stops |
-| **WP9** | Onboarding, phone, and public readiness | A stranger on a phone understands what they are looking at and sets a delay without being told what latency is |
+| **WP9** | Onboarding, the phone layout, and public readiness | A stranger on a tablet understands what they are looking at and sets a delay without being told what latency is; the page survives two hours and a device sleep |
 
 WP1–WP6 need no race and no server. That is the point of the ordering.
 
@@ -451,8 +486,10 @@ are binding on anything new. The unabridged log is in
 - **Zero is an absence, not a low value on a ramp.** Leave it unpainted.
 - **Order by what separates, not by sequence.** Lap order hid that some segments
   cover the whole field within 0.11 s while others spread it by a second.
-- **The hover target is the column, not the mark.** A 2 px dot is not a pointer
-  target.
+- **The target must be far larger than the mark.** A 2 px dot is not a pointer
+  target — and on the primary device there is no pointer at all. The original
+  finding said "the hover target is the column, not the mark"; on touch the
+  insight holds and the mechanism does not. See §4b.
 - **Bars start at zero; boxes and scatters do not.**
 - **An axis must not claim work that never happened.** Don't label an
   aggregation where there is one observation per point.
@@ -503,6 +540,12 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | Provenance still matters with only two tiers in play | A modelled undercut window and a measured lap time are not the same kind of claim. On a free public tool, blurring them misleads strangers rather than misleading its author |
 | 2026-09-07 | Recorded: trade mark survives the drop of the paid tier | The commercial exposure went away with the commerce; the naming exposure did not. F1 enforces its marks against free creators too |
 | 2026-09-07 | Phone raised to the top open decision rather than decided | "Second screen during a race" describes a phone, and the success criterion is now real in-race use — but it inverts most layout decisions, and layout is Chris's |
+| 2026-09-07 | **Device order decided: tablet, then laptop, then phone** | Chris's call, and better than the recommendation it replaced. A propped tablet in landscape is the actual second-screen posture and it gives room for a real layout rather than a compromise. Tablet and laptop are near-neighbours and share one layout; the phone is the outlier |
+| 2026-09-07 | **Hover cannot carry meaning, and an inherited finding had to be amended** | The primary device has no pointer. "The hover target is the column, not the mark" was right and pointer-shaped: the insight — target far larger than the mark — survives, the mechanism does not. Consequence: **the value readout is permanent rather than summoned**, occupying fixed layout space and updating on tap, because a tooltip has no good touch equivalent |
+| 2026-09-07 | **A race is two hours, which is an unusual session length for a web page** | It surfaces problems a short session never does: thermal throttling and battery drain from sustained WebGL, memory growth that appears ninety minutes in, and device sleep. On the primary device none of this is optimisation — it is whether the thing works |
+| 2026-09-07 | **Device sleep is the most likely real-world failure and is designed for, not tested for** | A tablet propped beside a television locks itself. On wake the connection is dead and the clock has drifted, possibly by an hour. It happens to every user rather than a few, and at exactly the moment they look back at the screen. Reconnect, re-sync the clock, backfill, visibly |
+| 2026-09-07 | The phone is a reduced product, not a scaled one | It serves Glance fully, Question partially and Dig not at all. Fitting the explorer onto a phone produces a control surface too fiddly to use one-thumbed while watching something else, and the effort would come out of the layout most people actually use |
+| 2026-09-07 | Minimum 44 px touch targets everywhere, laptop included | A pointer can hit a large target; a finger cannot hit a small one. Sizing for the weaker input costs the stronger one nothing |
 
 ---
 
