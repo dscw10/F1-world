@@ -32,9 +32,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -56,7 +56,14 @@ jobs:
           # than a path problem. See next.config.mjs.
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
 
+      # `enablement: true` switches GitHub Pages on for the repository if it is
+      # not already, rather than failing and requiring someone to go and click
+      # it in Settings. If the token is not permitted to do that, this step
+      # fails with "Get Pages site failed" and the manual route is:
+      # Settings → Pages → Source → GitHub Actions.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

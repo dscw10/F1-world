@@ -24,20 +24,20 @@ push to branch
 
 ---
 
-## One-time setup Chris needs to do
+## Enabling Pages
 
-The workflow cannot switch Pages on by itself. Once, in the browser:
+The workflow tries to switch Pages on itself (`enablement: true` on
+`configure-pages`), so there should be nothing to do.
 
-1. Go to the repository on GitHub → **Settings** → **Pages**
+**If a run fails with `Get Pages site failed ... Not Found`,** the token was not
+permitted to enable it and it needs doing once by hand:
+
+1. Repository on GitHub → **Settings** → **Pages**
 2. Under **Source**, choose **GitHub Actions** (not "Deploy from a branch")
-3. Save
+3. Save, then re-run the workflow from the **Actions** tab
 
-That is all. The next push deploys, and the URL appears in the Actions run and
-under Settings → Pages.
-
-If Pages has never been enabled, the first workflow run fails at the deploy step
-with a permissions error. That is the expected symptom, not a broken workflow —
-enable Pages and re-run it from the Actions tab.
+That error is the expected symptom of Pages being off — not a broken workflow.
+Everything before it (install, type check, build) will have passed.
 
 ---
 
