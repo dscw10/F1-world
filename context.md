@@ -16,9 +16,15 @@ Update the decision log whenever a decision is made or changed.
 
 ## 1. What this is
 
-A **free, live race dashboard**. During a Grand Prix, a viewer follows their
-driver and interrogates the race as it happens — not a passive scoreboard, but a
-surface where they can ask their own questions of the data while it arrives.
+A **free race dashboard** that plays a Grand Prix as it happened. The viewer
+follows their driver and interrogates the race as it unfolds — not a passive
+scoreboard, but a surface where they can ask their own questions of the data
+while it arrives.
+
+**It runs on completed races for now, replayed in real time; live data comes
+later.** While a race is playing the viewer sees only what has happened up to
+their clock, exactly as they would live. See §5.0 and
+`docs/04-replay-and-reveal.md`.
 
 **Success criterion: real people find it genuinely useful during real races.**
 Not a portfolio object, not a technical demonstration. That single choice
@@ -137,10 +143,11 @@ most likely to be under-served while the explorer gets the attention.
 
 ### In
 
-- One race weekend, live, end to end
+- One race, replayed in real time, end to end
 - Driver-centric framing: pick a driver, the whole dashboard reorients
 - The explorer — viewer-built queries over the available measures
-- Post-race and broadcast-sync modes on the same data model
+- Windowed replay: while playing, nothing later than the clock is visible.
+  Reaching the flag unlocks the whole race
 - 3D circuit: racing line, real elevation, segment colouring — supporting role
 - **Tablet first, then laptop, then phone** — see §4b and `docs/03-device-targets.md`
 - **Graceful degradation when the feed drops.** Not a polish item
@@ -202,6 +209,44 @@ that most people will actually use.
 
 ## 5. Data and delivery
 
+### 5.0 Archive now, live later — and it plays as though live
+
+**Decided 2026-09-07 (Chris).** Detail in `docs/04-replay-and-reveal.md`.
+
+The product ships against completed races. A finished race replays in real time,
+and while it plays the viewer sees only what has happened up to their clock.
+Reaching the chequered flag unlocks the whole race.
+
+**This is the right order, not merely the convenient one.** A windowed replay can
+only ever see a *prefix* of the race — thirty laps in, lap 31 has not happened —
+which is exactly the condition live imposes. So every analytic is written against
+partial data from the first line, and all of it is verifiable, because the race
+is finished and its real outcome is known. When live arrives it is a genuine
+transport swap rather than a second implementation.
+
+The alternative — build against whole races, add live afterwards — produces
+analytics that quietly assume they can see the end. That assumption does not
+announce itself; it surfaces as wrong numbers during the one hour a year the
+product is under load.
+
+**The rule this creates: no analytic may read data later than the clock.** Not
+"should not" — the windowed data is the only thing it is given. The window lives
+in the transport layer beside the delay buffer, for the same reason.
+
+| State | Available | Moments served (§3) |
+|---|---|---|
+| **Playing** | Everything up to the clock | Glance, Question |
+| **Finished** | The whole race | Dig |
+
+Recommended and not yet ratified: the clock is scrubbable, so dragging to the
+flag is the fast path to the finished state — one concept rather than a second
+"study" mode. Default playback 1×, with a speed control. Finished state persists
+per-device in `localStorage`; losing it costs one scrub, not real work.
+
+**What this defers:** the server (§5.2) and everything about real-time access.
+Archive data is static files a browser can fetch from static hosting. Deferred,
+not repealed — the rate limit applies the moment live arrives.
+
 ### 5.1 Two transports, one model
 
 ```
@@ -218,10 +263,14 @@ to "the data has stopped" rather than "the app is broken."
 race running, and every analytic can be verified against a race whose real
 outcome is already known — which is how the previous build caught its worst bugs.
 
-### 5.2 One server polls; every browser is served from it
+### 5.2 One server polls; every browser is served from it — DEFERRED
 
-**This is the largest technical consequence of building a public tool, and it is
-not optional.**
+**Not needed until live arrives (§5.0).** Archive data is static files served
+from static hosting. Kept in full because every word of it becomes true again the
+moment a live transport is added.
+
+**When live arrives, this is the largest technical consequence of building a
+public tool, and it is not optional.**
 
 OpenF1's free tier is roughly **3 requests/second and 30 requests/minute**
 **[unverified — see `docs/01`]**. Browsers talking to the source directly means
@@ -353,14 +402,15 @@ public tool, an unfamiliar convention is a bounce.
 
 ## 8. Open decisions
 
-**Blocking, and top of the list:**
+**Nothing is blocking the build.** Archive-first (§5.0) removed the last two
+blockers by deferring them with the live transport.
 
-- [ ] **Where does the server run, and what does it cost?** §5.2 makes an
-      always-on process mandatory. A free tool with a monthly bill needs that
-      bill to be small and known in advance
-- [ ] **Does OpenF1 charge for real-time access, and how much?** Reported but
-      unverified. Paying is fine — it is a running cost, not a licensing
-      problem — but the number needs to be known
+**Deferred with live, not resolved:**
+
+- [ ] Where the server runs and what it costs (§5.2). Needed when live arrives,
+      not before
+- [ ] Whether OpenF1 charges for real-time access. Irrelevant until there is a
+      live transport; historical data is free
 
 **Closed 2026-09-07:**
 
@@ -370,6 +420,10 @@ public tool, an unfamiliar convention is a bounce.
       carries the telemetry the product needs
 - [x] ~~The broadcast-delay stance~~ — three modes, live edge default. §5.3
 - [x] ~~Which device is primary~~ — **tablet, then laptop, then phone.** §4b
+- [x] ~~Whether to wait for live data~~ — **no. Archive first, replayed in real
+      time.** §5.0
+- [x] ~~Whether a replay reveals the whole race~~ — **windowed while playing,
+      unlocked at the flag.** §5.0
 
 **Still open:**
 
@@ -380,8 +434,11 @@ public tool, an unfamiliar convention is a bounce.
 - [ ] Which race is the development target. The 2024 Belgian GP was a strong
       test case in the previous build — divergent teammate strategies, a
       one-stop that leads at the flag, a disqualification
-- [ ] Whether the explorer's query lattice is right for a live context, where
-      data is arriving rather than complete
+- [ ] Whether the explorer's query lattice is right for a windowed context,
+      where data is arriving rather than complete
+- [ ] Whether the clock is scrubbable, making "drag to the flag" the fast path
+      to the finished state. Recommended — without it, Dig costs two hours
+- [ ] Whether finished state persists per-device in `localStorage`. Recommended
 - [ ] Whether the phone gets a genuinely different, simpler screen or the same
       one with sections collapsed. The first is better and costs more
 - [ ] Tablet portrait: recommended as the landscape panels stacked in priority
@@ -422,18 +479,21 @@ altitude is more accurate than any public elevation model.
 
 | WP | What | Done when |
 |---|---|---|
-| **WP0** | Product brief: screens, the three moments, phone-or-desktop, onboarding | §8's blocking decisions are answered |
-| **WP1** | Archive transport. FastF1 → normalised session model, one race | A known race exports and its finishing order, gaps and lap times match the official result |
-| **WP2** | Analytics: gaps, micro-sectors, pace/degradation, event detection | Each verified against the real race outcome |
+| **WP0** | Product brief: screens, the three moments, onboarding | The design questions in §8 are answered |
+| **WP1** | Archive pipeline. FastF1 → normalised session model, one race | A known race exports and its finishing order, gaps and lap times match the official result |
+| **WP2** | Analytics: gaps, micro-sectors, pace/degradation, event detection — **each written against a prefix, never the whole race** | Each verified against the real outcome, *and* each produces the right answer when given only the first N laps |
 | **WP3** | Design system as code, from Chris's Figma system | Every token referenced by name; none inlined |
-| **WP4** | The dashboard on archive data, driver-centric | Each of §3's three moments is served, Glance first |
-| **WP5** | The explorer | A viewer builds a query nobody anticipated and gets a correct answer or an explained refusal |
-| **WP6** | 3D circuit: racing line, elevation, segment colour | Recognisable, every metre addressable |
-| **WP7** | Server: poller, fan-out, cache, delay buffer | Many browsers served from one upstream connection; a dropped upstream reconnects and the UI says so |
-| **WP8** | Live transport behind the same model | Runs live with no analytics change, degrades visibly when the feed stops |
-| **WP9** | Onboarding, the phone layout, and public readiness | A stranger on a tablet understands what they are looking at and sets a delay without being told what latency is; the page survives two hours and a device sleep |
+| **WP4** | **The clock and windowed replay** | A finished race plays at 1×, nothing later than the clock is reachable, and the flag unlocks the whole race |
+| **WP5** | The dashboard on replayed data, driver-centric | Each of §3's three moments is served, Glance first |
+| **WP6** | The explorer, in the finished state | A viewer builds a query nobody anticipated and gets a correct answer or an explained refusal |
+| **WP7** | 3D circuit: racing line, elevation, segment colour | Recognisable, every metre addressable |
+| **WP8** | Public readiness: onboarding, the phone layout, the two-hour session | A stranger on a tablet understands what they are looking at; the page survives two hours and a device sleep |
+| **WP9** | *Later:* server — poller, fan-out, cache, delay buffer | Many browsers served from one upstream connection |
+| **WP10** | *Later:* live transport behind the same model | Runs live with no analytics change, degrades visibly when the feed stops |
 
-WP1–WP6 need no race and no server. That is the point of the ordering.
+WP1–WP8 need no race, no server, and no live source. That is the point of the
+ordering: everything runs on a race that finished two years ago, and nothing can
+rate-limit it.
 
 ---
 ## 11. Findings carried forward
@@ -546,6 +606,11 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | **Device sleep is the most likely real-world failure and is designed for, not tested for** | A tablet propped beside a television locks itself. On wake the connection is dead and the clock has drifted, possibly by an hour. It happens to every user rather than a few, and at exactly the moment they look back at the screen. Reconnect, re-sync the clock, backfill, visibly |
 | 2026-09-07 | The phone is a reduced product, not a scaled one | It serves Glance fully, Question partially and Dig not at all. Fitting the explorer onto a phone produces a control surface too fiddly to use one-thumbed while watching something else, and the effort would come out of the layout most people actually use |
 | 2026-09-07 | Minimum 44 px touch targets everywhere, laptop included | A pointer can hit a large target; a finger cannot hit a small one. Sizing for the weaker input costs the stronger one nothing |
+| 2026-09-07 | **Archive data first; live deferred. But it plays as though live** | Chris's call, and the right order rather than the convenient one: a windowed replay can only see a prefix of the race, which is exactly the condition live imposes. Every analytic is therefore written live-ready from the first line and verified against a race whose real outcome is known. Live becomes a transport swap instead of a second implementation |
+| 2026-09-07 | **No analytic may read data later than the clock** | Not a guideline — the windowed data is the only thing it is given. The window lives in the transport layer beside the delay buffer, because anything that can see un-shown data will eventually leak it. Building against whole races produces analytics that quietly assume they can see the end, and that assumption surfaces as wrong numbers during the one hour a year the product is under load |
+| 2026-09-07 | **A replay is windowed while playing and fully unlocked at the flag** | Chris's call. Mirrors how a real race works, so the replay is not a different product, and it maps cleanly onto the three moments: Glance and Question are windowed, Dig belongs to the finished state |
+| 2026-09-07 | The server is deferred, not repealed | Archive data is static files a browser can fetch from static hosting, so the poller and fan-out are not needed until live is. Every word of §5.2 becomes true again the moment live arrives, so it is kept in full rather than deleted |
+| 2026-09-07 | **Nothing is blocking the build any more** | The last two blockers — where the server runs and whether OpenF1 charges for real-time — were both about live, and both moved to later with it |
 
 ---
 

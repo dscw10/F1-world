@@ -9,10 +9,15 @@ for its findings only, and it contradicts this file deliberately.
 
 ## Project
 
-A **free, live race dashboard**. During a Grand Prix a viewer follows their
-driver and interrogates the race as it happens — building their own views rather
-than consuming fixed ones. The circuit is rendered in 3D and used only for
-findings that are genuinely spatial, in a supporting role.
+A **free race dashboard** that plays a Grand Prix as it happened. The viewer
+follows their driver and interrogates the race as it unfolds — building their own
+views rather than consuming fixed ones. The circuit is rendered in 3D and used
+only for findings that are genuinely spatial, in a supporting role.
+
+**Archive data now, replayed in real time; live comes later.** While a race is
+playing the viewer sees only what has happened up to their clock. Reaching the
+flag unlocks the whole race. See `context.md` §5.0 and
+`docs/04-replay-and-reveal.md`.
 
 **Success criterion: real people find it genuinely useful during real races.**
 Not a portfolio piece. Where craft and usefulness disagree, usefulness wins —
@@ -54,10 +59,14 @@ I am a UX/HMI specialist, not a developer. Therefore:
   `Date.now()` turns the other two into a rewrite.
 - **Delay buffering belongs in the transport layer.** No analytic and no
   component may see data the interface has not yet shown.
-- **Browsers never talk to the upstream data source.** One server polls; every
-  client is served from it. The free tier is ~3 req/s, so per-client fetching
-  breaks at a handful of viewers and abuses a volunteer-run service. See
-  `context.md` §5.2.
+- **No analytic may read data later than the clock.** Windowed data is the only
+  thing it is given. The window lives in the transport layer beside the delay
+  buffer. An analytic written against a whole race assumes it can see the end,
+  and that assumption does not announce itself.
+- **Browsers never talk to a *live* upstream source.** Deferred while the
+  project is archive-only — static artefacts are fetched directly and that is
+  fine — but the moment live arrives, one server polls and every client is
+  served from it. The free tier is ~3 req/s. See `context.md` §5.2.
 - **Reliability outranks polish.** The feed will drop mid-race. What the
   interface does in that moment matters more than any transition.
 - **Tablet first, then laptop, then phone.** A propped tablet in landscape is
@@ -93,22 +102,24 @@ I am a UX/HMI specialist, not a developer. Therefore:
 
 ## Stack
 
-Next.js (React) · Three.js · Python + FastF1 (offline archive pipeline) ·
-**OpenF1** for live (CC BY-NC-SA — non-commercial only, which is what this is) ·
-a small always-on server for polling and fan-out.
+Next.js (React) · Three.js · Python + FastF1 (offline archive pipeline).
+
+Deferred until live: **OpenF1** (CC BY-NC-SA — non-commercial only, which is what
+this is) and a small always-on server for polling and fan-out. Neither is needed
+to build WP1–WP8.
 
 ## Repo layout
 
 ```
 /pipeline      Python. Archive extraction via FastF1. Never runs at request time.
-/server        Poller and fan-out. One upstream connection, many clients.
-               Owns the delay buffer and the session cache.
+/server        Later. Poller and fan-out for live; one upstream connection,
+               many clients. Not needed while the project is archive-only.
 /app           Next.js routes.
 /components    React. /scene is the Three.js scene; /ui is DOM chrome.
 /lib           types.ts (the data contract), analytics, explorer, interpolation.
 /styles        Design tokens, mirrored from Chris's Figma design system.
 /docs          Specification. 01 = source licensing, 02 = broadcast sync,
-               03 = device targets.
+               03 = device targets, 04 = replay and reveal.
 /docs/archive  Superseded material. History, not instruction.
 ```
 

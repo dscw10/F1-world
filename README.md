@@ -1,8 +1,13 @@
 # F1 Live Race Dashboard
 
-A free, live dashboard for a Grand Prix. Follow one driver, interrogate the race
-as it happens, and build your own views of the data rather than consuming fixed
-ones. The circuit is rendered in 3D for findings that are genuinely spatial.
+A free dashboard that plays a Grand Prix as it happened. Follow one driver,
+interrogate the race as it unfolds, and build your own views of the data rather
+than consuming fixed ones. The circuit is rendered in 3D for findings that are
+genuinely spatial.
+
+It runs on completed races, replayed in real time — while a race is playing you
+see only what has happened so far, exactly as you would live. Live data comes
+later.
 
 The measure of success is that real people find it useful during real races.
 
@@ -26,6 +31,7 @@ not exist in this repository.
 | `docs/01-live-source-licensing.md` | Which data sources exist and what each licence permits. Mostly resolved by dropping the paid tier — read its header |
 | `docs/02-broadcast-sync.md` | Time, delay, and the three clock modes |
 | `docs/03-device-targets.md` | Tablet first, then laptop, then phone — and what that rules out |
+| `docs/04-replay-and-reveal.md` | Archive-first, windowed replay, and why that order de-risks live |
 | `docs/archive/2026-08-build-log.md` | The abandoned build's log, verbatim. History, not instruction — it describes Cesium, a weather layer and a post-race framing, all of which are superseded |
 
 The findings worth keeping from that archive are carried forward, curated, into
@@ -45,12 +51,9 @@ landscape is the second-screen posture. That rules out hover as a way of
 carrying meaning, since the primary device has no pointer, and it makes the
 two-hour session length a real design problem rather than an optimisation.
 
-One thing to know early: because the upstream free tier is a few requests per
-second, browsers cannot talk to it directly. A small always-on server polls once
-and serves every client. This is not a static site.
-
-None of this blocks the build. The archive pipeline, the analytics, the
-dashboard, the explorer and the 3D circuit all run on data from a race that
-finished two years ago, with no server at all.
+**Nothing is currently blocking the build.** The two open questions — where a
+server runs and whether OpenF1 charges for real-time access — were both about
+live, and both moved to later with it. Archive data is static files, so no
+server is needed yet.
 
 This file will describe how to run the thing once there is a thing to run.
