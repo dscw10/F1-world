@@ -1,12 +1,15 @@
 name: Build and deploy
 
-# Builds the static site and publishes it to GitHub Pages.
+# Builds the static site, and publishes it to GitHub Pages from `main`.
 #
-# Runs on every push to the development branch, so the iteration cycle is:
-# push → about two minutes → look at the URL.
+# The build-and-verify job runs on EVERY listed branch, so a push to a working
+# branch still says whether the code compiles and the output is sound.
+# The deploy job runs ONLY on `main`, because the `github-pages` environment
+# restricts deployments to the default branch — a deploy attempt from any other
+# branch is rejected by that policy before the job starts (it fails in about a
+# second, with no logs at all, which is otherwise a baffling thing to debug).
 #
-# `workflow_dispatch` adds a "Run workflow" button in the Actions tab, for
-# redeploying without pushing anything.
+# `workflow_dispatch` adds a "Run workflow" button in the Actions tab.
 
 on:
   push:
@@ -95,6 +98,8 @@ jobs:
 
   deploy:
     needs: build
+    # Only `main` may deploy: see the note at the top of this file.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

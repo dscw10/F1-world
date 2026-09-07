@@ -13,14 +13,28 @@ no live feed there is nothing to poll, so there is nothing to keep running.
 Static hosting is free, has no uptime to manage, and cannot be rate-limited.
 
 ```
-push to branch
-   → GitHub Actions: npm ci → typecheck → next build
-   → ./out (static files)
-   → GitHub Pages
-   → https://dscw10.github.io/F1-world/
+push to any branch      → npm ci → typecheck → next build → verify output
+push to main            → ...and then deploy
+                        → GitHub Pages
+                        → https://dscw10.github.io/F1-world/
 ```
 
-**The iteration cycle:** push, wait about two minutes, look at the URL.
+**The published site comes from `main`.** Working branches still build and
+verify, so a push says whether the code compiles — it just does not publish.
+
+**The iteration cycle:** merge to main, wait about two minutes, look at the URL.
+
+### Why deploys are restricted to `main`
+
+The `github-pages` environment allows deployments from the default branch only.
+That is GitHub's default when the environment is created, and it is separate
+from the Pages *source* setting.
+
+A deploy attempted from any other branch is rejected by the environment policy
+**before the job starts**: it sits in `waiting`, then fails after about one
+second, and the API returns 404 for its logs because it never ran. Nothing in
+the build is wrong, and there is no error message to find. The `if:` condition
+on the deploy job means that state cannot be reached by accident.
 
 ---
 
