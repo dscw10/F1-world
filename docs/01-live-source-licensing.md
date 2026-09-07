@@ -1,8 +1,24 @@
 # Live data sources, licensing, and whether a paid tier is possible
 
 **Written:** 2026-09-07
-**Settles:** nothing yet. This is the evidence for a decision in `context.md` §8.
-**Status:** research complete, decision outstanding.
+**Status: LARGELY RESOLVED, same day — the paid tier was dropped.**
+
+> **Read this first.** The central problem below — that the telemetry this
+> product needs exists only in sources forbidding **commercial** use — was
+> resolved by removing the commerce rather than by solving it. The project is a
+> free public tool, so **OpenF1's CC BY-NC-SA licence permits exactly what this
+> now is**, and §§3–4 and 6 below are history.
+>
+> Three things survive and are still live:
+> 1. **Trade mark (§5).** Unaffected by dropping the paid tier. The product
+>    still cannot be named "F1"-anything.
+> 2. **Whether OpenF1 charges for real-time access.** Paying them is fine — a
+>    running cost, not a licensing problem — but the figure is unverified.
+> 3. **Whether ShareAlike attaches to committed exports.** Querying an API is
+>    not obviously "Adapted Material"; shipping their data in the repo might be.
+>
+> Everything else is kept because the reasoning is worth having if the project
+> ever considers charging again.
 
 > **I am not a lawyer and this is not legal advice.** It is a survey of published
 > licences and terms, plus the relevant precedent, assembled so that Chris knows

@@ -16,79 +16,91 @@ Update the decision log whenever a decision is made or changed.
 
 ## 1. What this is
 
-A **live race dashboard**. During a Grand Prix, a viewer follows their driver
-and interrogates the race as it happens — not a passive scoreboard, but a
+A **free, live race dashboard**. During a Grand Prix, a viewer follows their
+driver and interrogates the race as it happens — not a passive scoreboard, but a
 surface where they can ask their own questions of the data while it arrives.
 
-Two things distinguish it:
+**Success criterion: real people find it genuinely useful during real races.**
+Not a portfolio object, not a technical demonstration. That single choice
+outranks everything else in this document, and where craft and usefulness pull
+in different directions, usefulness wins.
 
-**"Play data engineer."** The viewer builds their own view rather than
-consuming a fixed one. They pick what to measure and what to measure it
-against, and the interface answers or explains why it can't. The old build
-proved this idea works (`lib/explore.ts`, a dimension × measure lattice) — that
-concept is carried forward.
+The distinguishing idea is **"play data engineer"**: the viewer builds their own
+view rather than consuming a fixed one. They pick what to measure and what to
+measure it against, and the interface answers or explains why it can't. The old
+build proved this works (`lib/explore.ts`, a dimension × measure lattice) and
+that concept is carried forward.
 
-**A paid AI tier.** Generated analysis and forecasting, sitting above the free
-measured layer. Speculation the deterministic engine cannot produce: what a
-strategy is likely to yield, where a race is heading, what a driver's pace
-implies.
-
-The circuit is rendered in 3D — the racing line with its real measured
-elevation — and used for findings that are genuinely spatial. Nothing else.
+The circuit is rendered in 3D — the racing line with its real measured elevation
+— and used only for findings that are genuinely spatial. It is a supporting
+element, not the headline.
 
 ### What it is not
 
-- Not a live driver tracker. Apple TV ships one free, on the same screen as the
-  race. Dots moving round a circuit is commodity and is not the product.
-- Not a post-race craft piece. That was the previous direction. See §2.
-- Not a broadcast replacement. It assumes the viewer is already watching.
+- **Not a paid product.** Dropped 2026-09-07. Free, for everyone, no accounts,
+  no tiers, no billing.
+- **Not a live driver tracker.** Apple TV ships one free, on the same screen as
+  the race. Dots moving round a circuit is commodity.
+- **Not a craft or portfolio piece.** That was the original framing. The
+  execution should still be good, but "it looks beautiful" is not the test.
+- **Not a broadcast replacement.** It assumes the viewer is already watching.
 
 ---
 
-## 2. The pivot, and what it costs
+## 2. How this got here
 
-On 2026-09-07 the project restarted with a different product. This section
-exists so nobody has to reconstruct why the archive disagrees with everything.
+Two direction changes in one day, both on 2026-09-07. Recorded so nobody has to
+reconstruct why the archive disagrees with everything.
 
-**Previous direction (Aug 2026):** a post-race spatial analysis piece, framed as
-a craft/portfolio object. Offline Python pipeline, static JSON, no network
-beyond map tiles. Its code was never committed here and is gone.
+**August 2026:** a post-race spatial analysis piece, framed as a craft/portfolio
+object. Offline pipeline, static JSON, no network beyond map tiles. Its code was
+never committed here and is gone.
 
-**New direction:** a live, in-race product with a commercial tier.
+**Morning of 2026-09-07:** a live dashboard with a paid AI tier.
 
-### The four constraints this reverses
+**Afternoon of 2026-09-07:** the paid tier dropped. A free public tool.
 
-| Was | Now |
+### What dropping the paid tier fixed
+
+It resolved the single hardest problem in the project. The licensing research
+(`docs/01-live-source-licensing.md`) found that legal comfort and product
+quality were inversely related: the telemetry the product needs existed only in
+sources that forbid **commercial** use.
+
+Remove the commerce and that tension disappears entirely.
+
+| Was blocked | Now |
 |---|---|
-| **No live API dependency.** All data exported offline into static JSON | Live data is a first-class transport. The offline path survives as the fallback and the year-round product |
-| **Portfolio piece; analytical insight a by-product** | A product with paying users. Insight is the thing being sold |
-| **No language model anywhere; the site writes itself** | Partly reversed. Measured facts stay deterministic; a model handles the speculative tier only. See §6 |
-| **Weather is atmosphere, not data** | Unchanged in spirit, but weather is currently out of scope entirely |
+| OpenF1's CC BY-NC-SA licence forbids commercial use | **Non-commercial is exactly what it permits.** Usable |
+| Unknown whether licensed resellers carry telemetry | Irrelevant. Not buying data |
+| Needs a solicitor before taking money | No money, no solicitor |
+| Auth, billing, accounts, tiers | All gone |
 
-### What the reversal costs, stated plainly
+What survives from that research: **trade mark**. F1 enforces its marks, and a
+public tool with "F1" in the name is exposed regardless of whether it charges.
+See §8.
 
-1. **Demos on demand.** Live was cut in August precisely to protect this: a
-   piece that only works during a race weekend cannot be shown on a Tuesday.
-   There are ~24 race Sundays a year. Mitigated by §5's two-transport model, and
-   that mitigation is the main reason to adopt it.
-2. **Failure modes you do not control.** A live source can rate-limit, change
-   shape mid-season, or go down during the one hour that matters. Post-race data
-   cannot.
-3. **A legal surface.** Charging for analysis derived from F1 timing data is a
-   commercial question, not just a technical one. Open, unresolved — see §8.
-4. **Broadcast delay.** The hardest *design* problem in the pivot, and it is
-   yours. See §5.3.
+### What choosing "useful" over "craft" costs
+
+1. **Phone is probably now mandatory.** A second screen during a race is a phone.
+   Desktop-first was defensible for a craft piece and is hard to defend here.
+2. **A server becomes mandatory.** See §5.2 — this is the largest technical
+   consequence and it is not optional.
+3. **Reliability outranks polish.** The feed will drop mid-race. What the
+   interface does in that moment matters more than any transition.
+4. **Onboarding is real work.** Strangers arrive with no context. The delay
+   setting in particular has to be explained to someone who has never thought
+   about broadcast latency.
+5. **The 3D scene is demoted.** Still in scope, still road-and-elevation, but it
+   is no longer what the project is built around. A public tool's first job is
+   to be legible in five seconds.
 
 ### What survives untouched
 
-The analytics are transport-agnostic. Micro-sector timing, gap tracking,
-pace/degradation modelling and event detection all operate on lap and telemetry
-data regardless of whether it arrived four days ago or four seconds ago. The old
-log said as much: *"Live remains a later transport layer, not a rewrite."*
-
-Also surviving: Chris's *F1 Data Viz Design System* (in Figma — the only built
-artefact from the previous attempt that still exists), the decision to render in
-Three.js rather than Cesium, and the honesty discipline in §7.
+The analytics are transport-agnostic — micro-sector timing, gap tracking,
+pace/degradation modelling, event detection all work on lap and telemetry data
+regardless of when it arrived. Chris's *F1 Data Viz Design System* in Figma.
+Three.js rather than Cesium. The honesty discipline in §7.
 
 ---
 
@@ -101,23 +113,23 @@ specifically — not the leader, not the broadcast's chosen storyline.
 The broadcast shows one car at a time and chooses which. This shows the viewer's
 car all the time, and lets them ask why it is where it is.
 
-**Secondary:** the fan who wants to argue. Every claim needs to be checkable and
-shareable, or the product has no word of mouth.
+**Secondary:** the fan who wants to argue. Every claim must be checkable and
+shareable, or a free tool has no way to spread.
 
-**Not the audience:** teams, journalists on deadline, or anyone needing
+**Not the audience:** teams, journalists on deadline, anyone needing
 regulatory-grade accuracy.
 
 ### The three moments the product must serve
 
 | Moment | Effort the viewer will spend | What the interface owes them |
 |---|---|---|
-| **Glance** | Two seconds, during a DRS-free straight | One state, unambiguous: is my driver's race going well or badly, and what changed |
+| **Glance** | Two seconds, mid-lap | One state, unambiguous: is my driver's race going well or badly, and what changed |
 | **Question** | Thirty seconds, during a safety car | An answer to one specific question they formed themselves |
-| **Dig** | Minutes, after the flag or between sessions | The full explorer, the charts, the spatial layers |
+| **Dig** | Minutes, after the flag | The explorer, the charts, the spatial layers |
 
-These are the same three journeys the previous build identified (Catch up,
-Interrogate, Settle), re-cut for a live context. They differ by available
-attention, which is what should decide layout priority.
+They differ by available attention, which is what should decide layout priority.
+**Glance is the one that decides whether anybody comes back**, and it is the one
+most likely to be under-served while the explorer gets the attention.
 
 ---
 
@@ -128,86 +140,89 @@ attention, which is what should decide layout priority.
 - One race weekend, live, end to end
 - Driver-centric framing: pick a driver, the whole dashboard reorients
 - The explorer — viewer-built queries over the available measures
-- 3D circuit: racing line and real measured elevation, segment colouring
-- Post-race mode on the same data model
-- AI tier: generated analysis and forecasting, labelled as such
+- Post-race and broadcast-sync modes on the same data model
+- 3D circuit: racing line, real elevation, segment colouring — supporting role
+- **Phone support** (see §8 — recommended as primary, not yet ratified)
+- **Graceful degradation when the feed drops.** Not a polish item
+- Onboarding sufficient for a stranger, including the delay setting
 - Chris's design system, applied throughout
 
-### Out (for now)
+### Out
 
-- Weather of any kind. Removed in the previous build and not reinstated
-- Terrain, forest, buildings, scenery. Largest and riskiest body of work in the
-  old build and still unfinished when it stopped. Explicitly cut
-- All circuits. One circuit proves it; breadth is a data problem, later
-- Mobile. Desktop and tablet first — though "second screen" makes phone support
-  a much stronger candidate than it was, and this should be revisited early
+- **The paid tier, and generated AI content.** The three-tier provenance model
+  is kept so a generated layer can be added later without rework, but nothing
+  generative is built. See §6
+- Accounts, auth, billing
+- Weather of any kind
+- Terrain, forest, buildings, scenery
+- All circuits. One proves it; breadth is a data problem, later
 - Historical archive browsing across seasons
 
 ### Later, deliberately
 
+- A generated/forecast layer, if the measured product earns it
 - Season-wide and multi-race comparison
-- Native/mobile second-screen app
 - Additional circuits
 
 ---
 
-## 5. Data
-
-This is the section the pivot rewrote, and the one with the most unresolved
-questions in it.
+## 5. Data and delivery
 
 ### 5.1 Two transports, one model
 
-The recommendation, not yet ratified:
-
 ```
-                 ┌── live transport (race day) ──┐
-                 │                               ├──> normalised session model ──> analytics ──> UI
-                 └── archive transport (FastF1) ─┘
+              ┌── live transport (race day) ──┐
+              │                               ├──> normalised session model ──> analytics ──> UI
+              └── archive transport (FastF1) ─┘
 ```
 
-The analytics layer must not know which transport fed it. This is what makes the
-product exist year-round, keeps it demonstrable, and means live outages degrade
+The analytics layer must not know which transport fed it. This is what lets the
+product work year-round, keeps it demonstrable, and means a live outage degrades
 to "the data has stopped" rather than "the app is broken."
 
-**Build the archive transport first.** It is testable, repeatable, and does not
-require a race to be running. Every analytic can be verified against a race
-whose real outcome is already known — which is exactly how the previous build
-caught its worst bugs.
+**Build the archive transport first.** It is testable and repeatable without a
+race running, and every analytic can be verified against a race whose real
+outcome is already known — which is how the previous build caught its worst bugs.
 
-### 5.2 Candidate live sources — researched 2026-09-07, still unresolved
+### 5.2 One server polls; every browser is served from it
 
-Full findings and sourcing in `docs/01-live-source-licensing.md`. Summary:
+**This is the largest technical consequence of building a public tool, and it is
+not optional.**
 
-| Source | Terms | Live | Telemetry | Paid product allowed |
-|---|---|---|---|---|
-| **OpenF1** | CC BY-NC-SA 4.0 | Yes | Yes | **No** — NonCommercial *and* ShareAlike |
-| **FastF1** | MIT — the *software*, not the data | Recorder only | Yes | Software yes, data no |
-| **jolpica-f1** | Apache 2.0 | No | No | Not a live source |
-| **F1 official stream** | F1's own terms | Yes | Yes | **No** without a licence |
-| **Sportmonks** | Commercial, ~€79/mo | Yes | Depth unverified | Yes |
-| **Hyprace** | Commercial, from ~$7.99/mo | Partial | No | Yes |
+OpenF1's free tier is roughly **3 requests/second and 30 requests/minute**
+**[unverified — see `docs/01`]**. Browsers talking to the source directly means
+the whole audience shares that budget: a handful of concurrent viewers exhausts
+it, and a popular race would be hammering a volunteer-run free service with no
+SLA. That is both a technical failure and a bad-citizen problem.
 
-**The finding that matters:** legal comfort and product quality are inversely
-related. The high-rate telemetry this product is built on — position at ~10 Hz,
-speed, throttle, brake — exists in depth only in the sources that forbid
-commercial use. The sources you can straightforwardly pay for and resell supply
-timing and classification, which is roughly what Apple TV already gives away.
+So:
 
-So licensing is not a formality to clear on the way to building. It partly
-determines what the product can be.
+```
+  source ──> [ one poller ]  ──> normalised model ──> [ fan-out to N browsers ]
+              once per tick                            SSE or WebSocket
+```
 
-**Load-bearing unknown:** whether any commercially licensed provider sells
-telemetry at the depth the analytics need. If not, the option of buying a clean
-licence and keeping the product intact does not exist. Both providers offer free
-tiers, so this is an afternoon's work and should happen before any other
-licensing effort.
+Consequences to design around:
+
+- **This is not a static site.** Something has to stay running during a race.
+  Hosting, cost and uptime become real questions — see §8.
+- **The delay buffer lives here**, in the transport, which is where §5.3 already
+  put it. One mechanism serves both needs.
+- **The poller is a single point of failure** for every connected viewer. It has
+  to reconnect on its own and the UI has to say what is happening when it can't.
+- **Cache and replay from the server, not the client.** A viewer who opens the
+  page on lap 40 needs the first 39 laps, and must not fetch them from the
+  source.
+- **Real-time access may cost money.** OpenF1 reportedly gates live data behind
+  a paid subscription — live meaning 30 minutes either side of a session
+  **[unverified]**. Paying them for access is entirely compatible with
+  non-commercial use; it is a running cost, not a licensing problem.
 
 ### 5.3 Broadcast delay — decided
 
 Timing data reaches a client at or before the moment the viewer sees the action
 on television, and streaming viewers are further behind again. Left alone, the
-dashboard spoils its own user during the event it exists to enhance.
+dashboard spoils its own user during the event it exists for.
 
 **Decided 2026-09-07 (Chris).** Three modes on one mechanism — a clock with a
 variable time origin. Detail in `docs/02-broadcast-sync.md`.
@@ -220,24 +235,19 @@ variable time origin. Detail in `docs/02-broadcast-sync.md`.
 
 Offset is set by a calibration gesture — the user taps when they see the lights
 go out — rather than by understanding a number. **Broadcast sync** replays a
-finished session as though live, started when the user's own broadcast starts
-and pausable when they pause their television.
+finished session as though live, started when the user's own broadcast starts and
+pausable when they pause their television.
 
-**Broadcast sync is architecturally load-bearing, not an accommodation.** It is
-the same clock with a different origin, so it costs almost nothing *if the clock
-is an abstraction from the start* — and it returns the demonstrable-on-any-day
-property that §2 records the live pivot as having cost. It also makes the live UI
-testable without waiting for a race, which is otherwise possible about
-twenty-four times a year.
+**Broadcast sync is architecture, not an accommodation.** Same clock, different
+origin — nearly free *if the clock is an abstraction from the start*, a rewrite
+if live is hardwired to the wall clock. It makes the live UI testable without
+waiting for a race, and it is the only mode in which pause is possible.
 
-**The cost of defaulting to zero, stated:** the product spoils people by default.
-This is a deliberate exception to the never-spoil constraint, resolved as *never
-spoil the viewer without their informed choice*. It places a hard requirement on
-onboarding — the delay choice is presented once, clearly, before the first
-session, never buried in settings.
-
-**Buffering belongs in the transport layer, below the analytics.** No analytic
-and no component may see data the interface is not yet showing.
+**Defaulting to zero is a deliberate exception to the never-spoil rule**,
+resolved as *never spoil the viewer without their informed choice*. For a public
+tool this is heavier than it was: strangers arrive knowing nothing about
+broadcast latency, so the choice must be offered once, clearly, in language that
+assumes no prior understanding — never buried in settings.
 
 ### 5.4 What can be measured, and at what confidence
 
@@ -245,179 +255,152 @@ Carried forward from the previous build's data inventory, still true:
 
 - **DRS does not exist in 2026.** Removed by the current regulations and
   replaced by active aero plus Manual Override, a boost available *anywhere* on
-  the lap. Any `DRS` channel is valid for 2018–2025 only. This makes overtaking
-  a spatial question rather than a matter of detection lines.
+  the lap. Any `DRS` channel is valid for 2018–2025 only.
 - Gaps must be measured **at a moment**, never lap-against-lap. Once a car is
   lapped, its lap N and the leader's lap N are different points in the race.
-- Raw lap times across a race compare fuel loads as much as pace. A car starts
-  ~110 kg heavy at roughly 0.03 s/lap/kg. Fuel correction is required for any
+- Raw lap times across a race compare fuel loads as much as pace — roughly
+  0.03 s/lap/kg against a ~110 kg start. Fuel correction is required for any
   pace claim.
-- Tyre degradation is a curve over stint age with no location on the circuit.
-  It is a chart, not a track encoding.
+- Tyre degradation is a curve over stint age with no location on the circuit. It
+  is a chart, not a track encoding.
 
 ---
 
-## 6. The AI tier
+## 6. Provenance — three tiers, two of them built
 
-The previous build's rule was *no language model anywhere*, and the reasoning
-was sound: facts generated from corpus percentiles are deterministic, checkable,
-and cannot hallucinate. That rule is **narrowed, not abandoned.**
+The previous build's rule was *no language model anywhere*, and the reasoning was
+sound: facts generated from corpus percentiles are deterministic and checkable.
 
-### The split
+**Nothing generative is being built.** But the three-tier model is kept, because
+it costs nothing now and prevents a rewrite later.
 
-| Tier | Produced by | Can it be wrong? |
+| Tier | Produced by | Built? |
 |---|---|---|
-| **Measured** | Directly from the feed | Only if the feed is wrong |
-| **Modelled** | Deterministic code — degradation fits, undercut windows, percentiles | Yes, and it states its assumptions |
-| **Generated** | A language model | Yes, and it is speculation by construction |
+| **Measured** | Directly from the feed | Yes |
+| **Modelled** | Deterministic code — degradation fits, undercut windows, percentiles | Yes |
+| **Generated** | A language model | **No. Reserved** |
 
-**The binding rule: a measured or modelled value never routes through a language
-model.** A model may *discuss* those values; it may never be the thing that
-computes or restates them. The moment a number's provenance runs through
-generation, the product's central claim — that it is checkable — is gone.
+**The binding rule stands: a measured or modelled value never routes through a
+language model.** With nothing generative built this is trivially satisfied; it
+is written down so it survives the day someone adds a generated layer.
 
-### Consequences to design for
-
-- Generated content must be visually distinct at a glance, not footnoted.
-- A forecast must carry what it was conditioned on, so a wrong one can be
-  understood rather than merely disbelieved.
-- The free tier must stand alone. If the measured product is only coherent with
-  the AI layer switched on, the AI layer is compensating for a thin product.
-
-### Open
-
-Which model, hosted where, at what per-user cost, and whether inference happens
-per-request or on a schedule shared across users. Untouched — see §8.
+Every figure declares its tier at the point of use. With two tiers in play that
+distinction still matters — a modelled undercut window and a measured lap time
+are not the same kind of claim, and a free public tool that blurs them is
+misleading strangers rather than misleading its author.
 
 ---
 
 ## 7. Standing principles
 
-These survived the pivot intact and are binding regardless of direction.
+**Honesty about provenance.** Every figure can say where it came from and how
+much to trust it, visibly, at the point of use.
 
-**Honesty about provenance.** Every figure on screen can say where it came from
-and how much to trust it. Measured, modelled, generated — visible at the point
-of use, not in a footnote.
-
-**Absence is not zero.** A value that was never measured is rendered as absent,
-not as the bottom of a scale. Lines break where data is missing rather than
-interpolating across it.
+**Absence is not zero.** Unmeasured values render as absent. Lines break where
+data is missing rather than interpolating across it.
 
 **Refuse rather than mislead.** When a verification gate fails, publish nothing
-and say why. A wrong figure presented confidently is worse than a gap. The
-previous build's terrain and micro-sector gates are the model for this.
+and say why. A confident wrong figure is worse than a gap.
 
-**One saturated colour encoding at a time.** Enforced by the type system — a
-single mode value, not two booleans — so the rule is unrepresentable to break
-rather than merely discouraged.
+**Degrade visibly.** A silent failure that looks like a design choice is the
+worst kind — and on a public tool, the one that loses people permanently.
+
+**One saturated colour encoding at a time.** Enforced by the type system — one
+mode value, not two booleans.
 
 **Design tokens are law.** No hardcoded colour, spacing or type size in a
-component. If a token is missing, add it to the token file.
+component.
 
 **Copy conventions rather than invent better ones.** Team colours, teammates
-separated by line style, a dot on a pit lap. Fluency beats novelty.
+separated by line style, a dot on a pit lap. Fluency beats novelty — and on a
+public tool, an unfamiliar convention is a bounce.
 
 ---
 
 ## 8. Open decisions
 
-Ordered by how much they block.
+**Blocking, and top of the list:**
 
-**Blocking the live half:**
+- [ ] **Is phone the primary target?** Recommended: yes. "Second screen during a
+      race" describes a phone, and the success criterion is now real people
+      using it during real races. This inverts most layout decisions, so it
+      should be settled before any UI work. Chris's call
+- [ ] **Where does the server run, and what does it cost?** §5.2 makes an
+      always-on process mandatory. A free tool with a monthly bill needs that
+      bill to be small and known in advance
+- [ ] **Does OpenF1 charge for real-time access, and how much?** Reported but
+      unverified. Paying is fine — it is a running cost, not a licensing
+      problem — but the number needs to be known
 
-- [ ] **Whether any licensed provider sells telemetry at the depth we need.**
-      The load-bearing unknown. Both Sportmonks and Hyprace offer free tiers, so
-      this is an afternoon's work and it collapses or confirms two of the four
-      options below. **Do this first**
-- [ ] **Which live source.** Researched 2026-09-07 (`docs/01-live-source-licensing.md`).
-      OpenF1 is CC BY-NC-SA — non-commercial and ShareAlike — so it cannot carry a
-      paid tier without a negotiated licence. FastF1's MIT licence covers the
-      software, not the data. The licensed resellers permit commerce but may not
-      carry telemetry. No option is both free of restriction and rich enough yet
-- [ ] **Whether a paid tier on F1-derived data is viable at all**, and under
-      which of the four routes. Needs a solicitor before money changes hands —
-      the five questions to put to them are in `docs/01-live-source-licensing.md` §6
-- [x] ~~**The broadcast-delay stance.**~~ **Decided 2026-09-07.** Three modes on
-      one clock: live edge (default, zero offset), user-set offset, and broadcast
-      sync. See §5.3 and `docs/02-broadcast-sync.md`
+**Closed 2026-09-07:**
 
-**Blocking the build order:**
+- [x] ~~Whether a paid tier is viable~~ — no paid tier. Dropped
+- [x] ~~Which live source~~ — **OpenF1**, subject to verifying the two points
+      above. Non-commercial use is what its CC BY-NC-SA licence permits, and it
+      carries the telemetry the product needs
+- [x] ~~The broadcast-delay stance~~ — three modes, live edge default. §5.3
 
-- [ ] **Whether the two-transport model is adopted** (§5.1). Recommended.
-      If rejected, the project is live-only and stops being demonstrable
-- [ ] **Which race is the development target.** The previous build used the 2024
-      Belgian GP and found it a strong test case — divergent teammate
-      strategies, a one-stop that leads at the flag, a disqualification
-- [ ] **Whether phone is a first-class target.** "Second screen" implies a phone
-      far more than the old desktop-first brief did
-- [ ] **The product's name.** It cannot contain "F1" or "Formula 1" if it is
-      sold — F1 enforces this against creators, and trade mark is far more
-      clear-cut than database right. Cheap to change now; expensive later.
-      This repository is currently called `F1-world`
+**Still open:**
 
-**Blocking the AI tier:**
-
-- [ ] Model, hosting, and per-user cost (§6)
-- [ ] What is actually free and what is paid, and whether the free tier stands
-      up alone
-
-**Still open from before, still relevant:**
-
-- [ ] Whether the explorer's query lattice is the right shape for a live
-      context, where the data is arriving rather than complete
+- [ ] **The name.** Cannot contain "F1" or "Formula 1" — trade mark survives the
+      drop of the paid tier, and F1 enforces it against free creators too. This
+      repository is called `F1-world`
+- [ ] Whether the two-transport model is ratified (§5.1). Recommended
+- [ ] Which race is the development target. The 2024 Belgian GP was a strong
+      test case in the previous build — divergent teammate strategies, a
+      one-stop that leads at the flag, a disqualification
+- [ ] Whether the explorer's query lattice is right for a live context, where
+      data is arriving rather than complete
+- [ ] Whether ShareAlike attaches if exported data is committed to the repo.
+      Querying an API is not obviously "Adapted Material"; shipping their data
+      might be. Worth an hour before committing any cached export
 - [ ] Real measured frame rate with 20 cars on screen. Never recorded
 
 ---
 
 ## 9. Architecture
 
-Nothing is built. This is the intended shape, not a description.
+Nothing is built. This is intent, not description.
 
 ```
 /pipeline      Python. Archive extraction via FastF1 → normalised JSON.
                Offline, never on the request path.
-/ingest        (new) Live transport. Normalises the live feed into the same
-               model the pipeline emits. Source undecided — see §5.2.
+/server        The poller and fan-out. One connection to the source, many
+               clients. Owns the delay buffer and the session cache.
 /app           Next.js routes.
 /components    React. /scene is the Three.js scene; /ui is DOM chrome.
-/lib           types.ts (the data contract), analytics, explorer, interpolation.
+/lib           types.ts (the data contract), analytics, explorer, clock.
 /styles        Design tokens, mirrored from Chris's Figma system.
-/docs          Specification. Written before the code it describes.
+/docs          Specification.
 /docs/archive  Superseded material, kept verbatim.
 ```
 
-**Rendering: Three.js, not Cesium.** Carried forward from the previous build and
-not up for reconsideration without a reason. Cesium cost 4.7 MB of JavaScript, an
-account token, and runtime tile requests, for exactly one job that mattered.
+**Rendering: Three.js, not Cesium.** Carried forward. Cesium cost 4.7 MB of
+JavaScript, an account token and runtime tile requests for one job.
 
-**3D scope: road and elevation only.** The racing line, its measured altitude,
-and per-segment colouring. No terrain bake, no scenery. The car's own altitude is
-more accurate than any public elevation model anyway.
+**3D scope: road and elevation only.** No terrain bake, no scenery. The car's own
+altitude is more accurate than any public elevation model.
 
 ---
 
 ## 10. Work packages
 
-Order reflects the two-transport recommendation. If that is rejected, WP1 and
-WP2 swap and the project loses its offline fallback.
-
 | WP | What | Done when |
 |---|---|---|
-| **WP0** | **This document, plus the product brief.** The live/paid direction turned into a specification: screens, the three moments, the delay stance | A brief exists that answers §8's blocking decisions |
+| **WP0** | Product brief: screens, the three moments, phone-or-desktop, onboarding | §8's blocking decisions are answered |
 | **WP1** | Archive transport. FastF1 → normalised session model, one race | A known race exports and its finishing order, gaps and lap times match the official result |
-| **WP2** | Analytics on that model: gaps, micro-sectors, pace/degradation, event detection | Each verified against the real race outcome |
-| **WP3** | Design system as code. Tokens from Chris's Figma system | Every token referenced by name; none inlined |
-| **WP4** | The dashboard, driver-centric, on archive data | The three moments of §3 are each served |
-| **WP5** | The explorer | A viewer builds a query the product's authors did not anticipate, and gets a correct answer or an explained refusal |
-| **WP6** | 3D circuit: racing line, elevation, segment colour | The circuit is recognisable and every metre is addressable |
-| **WP7** | Live transport, behind the same model | The dashboard runs live with no analytics change, and degrades visibly when the feed stops |
-| **WP8** | The delay stance, implemented | Nothing spoils the viewer's broadcast |
-| **WP9** | AI tier, auth, billing | Generated content is distinguishable at a glance from measured |
+| **WP2** | Analytics: gaps, micro-sectors, pace/degradation, event detection | Each verified against the real race outcome |
+| **WP3** | Design system as code, from Chris's Figma system | Every token referenced by name; none inlined |
+| **WP4** | The dashboard on archive data, driver-centric | Each of §3's three moments is served, Glance first |
+| **WP5** | The explorer | A viewer builds a query nobody anticipated and gets a correct answer or an explained refusal |
+| **WP6** | 3D circuit: racing line, elevation, segment colour | Recognisable, every metre addressable |
+| **WP7** | Server: poller, fan-out, cache, delay buffer | Many browsers served from one upstream connection; a dropped upstream reconnects and the UI says so |
+| **WP8** | Live transport behind the same model | Runs live with no analytics change, degrades visibly when the feed stops |
+| **WP9** | Onboarding, phone, and public readiness | A stranger on a phone understands what they are looking at and sets a delay without being told what latency is |
 
-WP1–WP6 need no race to be running. That is the point of the ordering.
+WP1–WP6 need no race and no server. That is the point of the ordering.
 
 ---
-
 ## 11. Findings carried forward
 
 From the abandoned build. The code is gone; these cost real time to discover and
@@ -511,6 +494,15 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | Defaulting to zero delay is a deliberate exception to the never-spoil rule | The constraint becomes *never spoil the viewer without their informed choice*, which puts a hard requirement on onboarding: the delay choice is presented once, clearly, before the first session, never buried in settings |
 | 2026-09-07 | Delay buffering lives in the transport layer, below the analytics | An analytic that can see data the interface has not yet shown will eventually leak it |
 | 2026-09-07 | Recorded: the product cannot ship under a name containing "F1" | Trade mark is the clearest exposure of the three and F1 actively enforces it against creators. This repository is called `F1-world` |
+| 2026-09-07 | **The paid tier is dropped. Free public tool** | Chris's call. It resolves the hardest problem in the project rather than deferring it: the licensing research found that the telemetry the product needs exists only in sources forbidding *commercial* use, so removing the commerce removes the conflict entirely |
+| 2026-09-07 | **Live source settled: OpenF1** | Its CC BY-NC-SA licence permits exactly what this now is — non-commercial use — and it carries the telemetry the analytics and spatial layers depend on. Two things still to verify: whether real-time access carries a subscription fee, and whether ShareAlike attaches to committed exports |
+| 2026-09-07 | **Success criterion: real people find it useful during real races**, not execution quality | Chris's call, and it outranks everything else in the document. Where craft and usefulness disagree, usefulness wins. This demotes the 3D scene from headline to supporting element and promotes reliability, onboarding and phone support above polish |
+| 2026-09-07 | **A server is now mandatory, and this is the largest technical consequence of going public** | OpenF1's free tier is ~3 req/s. Browsers talking to the source directly means the whole audience shares that budget — a handful of concurrent viewers exhausts it, and a popular race would be hammering a volunteer-run free service with no SLA. One poller, fan-out to many clients. The project stops being a static site |
+| 2026-09-07 | The delay buffer and the poller are the same layer | Both need to sit between the source and every client, and both must be invisible to the analytics. One mechanism, already required by the delay decision, now also required by the rate limit |
+| 2026-09-07 | **Generated content cut; the three-tier provenance model kept** | Chris's call. Nothing generative is built, but measured/modelled/generated survives as a type distinction so a generated layer can be added later without rework. The rule that a measured or modelled value never routes through a language model is written down now, while it is trivially satisfied, so it survives the day someone adds one |
+| 2026-09-07 | Provenance still matters with only two tiers in play | A modelled undercut window and a measured lap time are not the same kind of claim. On a free public tool, blurring them misleads strangers rather than misleading its author |
+| 2026-09-07 | Recorded: trade mark survives the drop of the paid tier | The commercial exposure went away with the commerce; the naming exposure did not. F1 enforces its marks against free creators too |
+| 2026-09-07 | Phone raised to the top open decision rather than decided | "Second screen during a race" describes a phone, and the success criterion is now real in-race use — but it inverts most layout decisions, and layout is Chris's |
 
 ---
 

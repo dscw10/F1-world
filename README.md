@@ -1,10 +1,10 @@
 # F1 Live Race Dashboard
 
-A live dashboard for a Grand Prix. Follow one driver, interrogate the race as it
-happens, and build your own views of the data rather than consuming fixed ones.
-A paid tier adds generated analysis and forecasting above the free measured
-layer. The circuit is rendered in 3D and used for findings that are genuinely
-spatial.
+A free, live dashboard for a Grand Prix. Follow one driver, interrogate the race
+as it happens, and build your own views of the data rather than consuming fixed
+ones. The circuit is rendered in 3D for findings that are genuinely spatial.
+
+The measure of success is that real people find it useful during real races.
 
 ## Status: definition. There is no code yet.
 
@@ -23,7 +23,7 @@ not exist in this repository.
 |---|---|
 | `context.md` | **Start here.** Scope, decisions, open questions. The source of truth |
 | `CLAUDE.md` | Project instructions, read automatically by Claude Code |
-| `docs/01-live-source-licensing.md` | Which live data sources exist, what each licence permits, and whether a paid tier is possible |
+| `docs/01-live-source-licensing.md` | Which data sources exist and what each licence permits. Mostly resolved by dropping the paid tier — read its header |
 | `docs/02-broadcast-sync.md` | Time, delay, and the three clock modes |
 | `docs/archive/2026-08-build-log.md` | The abandoned build's log, verbatim. History, not instruction — it describes Cesium, a weather layer and a post-race framing, all of which are superseded |
 
@@ -32,22 +32,23 @@ The findings worth keeping from that archive are carried forward, curated, into
 
 ## What is decided, and what is not
 
-Decided: the product is a live race dashboard; rendering is Three.js; the 3D
-scene covers the racing line and its real elevation and nothing else; measured
-figures never route through a language model.
+Decided: free, no paid tier, no accounts, nothing generative. Live data comes
+from OpenF1, whose non-commercial licence permits exactly this. Rendering is
+Three.js, and the 3D scene covers the racing line and its elevation, in a
+supporting role. Broadcast delay is handled by three clock modes, defaulting to
+the live edge, with a broadcast-sync mode that replays a finished race in step
+with the viewer's own screen.
 
-Also decided: how the interface handles broadcast delay — three clock modes,
-defaulting to the live edge, with a broadcast-sync mode that replays a finished
-race in step with the viewer's own screen.
+**Open, and top of the list:** whether phone is the primary target. "Second
+screen during a race" describes a phone, and it inverts most layout decisions,
+so it wants settling before any UI work.
 
-**Not decided, and blocking the live half:** which data source to use, and
-whether a paid tier on F1-derived data is possible at all. No candidate source
-is both free of commercial restriction and rich enough — OpenF1 is
-non-commercial, and the sources you can buy may not carry telemetry. See
-`docs/01-live-source-licensing.md`.
+One thing to know early: because the upstream free tier is a few requests per
+second, browsers cannot talk to it directly. A small always-on server polls once
+and serves every client. This is not a static site.
 
 None of this blocks the build. The archive pipeline, the analytics, the
 dashboard, the explorer and the 3D circuit all run on data from a race that
-finished two years ago.
+finished two years ago, with no server at all.
 
 This file will describe how to run the thing once there is a thing to run.
