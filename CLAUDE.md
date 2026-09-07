@@ -25,9 +25,10 @@ that outranks every other guidance here.
 
 There is no paid tier, no accounts, and nothing generative. Dropped 2026-09-07.
 
-**Status: nothing is built.** The August 2026 build's code was never committed
-and the project restarted clean on 2026-09-07. Anything describing existing
-files is describing intent.
+**Status: WP1-WP6 built.** Pipeline, windowed replay, analytics, dashboard and
+explorer all run against a synthetic fixture. The real export has never been
+run — this sandbox has no network route to F1's servers, so `pipeline/README.md`
+explains what Chris has to run locally.
 
 ## Working with me
 
@@ -59,10 +60,15 @@ I am a UX/HMI specialist, not a developer. Therefore:
   `Date.now()` turns the other two into a rewrite.
 - **Delay buffering belongs in the transport layer.** No analytic and no
   component may see data the interface has not yet shown.
-- **No analytic may read data later than the clock.** Windowed data is the only
-  thing it is given. The window lives in the transport layer beside the delay
-  buffer. An analytic written against a whole race assumes it can see the end,
-  and that assumption does not announce itself.
+- **No analytic may read data later than the clock.** Enforced structurally:
+  analytics take a `SessionWindow` (`lib/window.ts`) and there is no route from
+  it back to the whole race. Do not add one. An analytic written against a
+  whole race assumes it can see the end, and that assumption does not announce
+  itself.
+- **Synthetic data proves plumbing, never correctness.** The fixture was
+  generated from a model of a race, so an analytic tested against it only
+  confirms that model. The correctness gate is a real race, checked against
+  facts the analytic did not generate.
 - **Browsers never talk to a *live* upstream source.** Deferred while the
   project is archive-only — static artefacts are fetched directly and that is
   fine — but the moment live arrives, one server polls and every client is
@@ -111,15 +117,18 @@ to build WP1–WP8.
 ## Repo layout
 
 ```
-/pipeline      Python. Archive extraction via FastF1. Never runs at request time.
-/server        Later. Poller and fan-out for live; one upstream connection,
-               many clients. Not needed while the project is archive-only.
-/app           Next.js routes.
-/components    React. /scene is the Three.js scene; /ui is DOM chrome.
-/lib           types.ts (the data contract), analytics, explorer, interpolation.
+/pipeline      Python. export_session.py (real), make_fixture.py (synthetic).
+/lib           types.ts is THE CONTRACT — mirrors pipeline/schema.py, change
+               together. window.ts is the windowing primitive every analytic
+               is fed through. clock.ts, analytics.ts, explore.ts, data.ts.
+/components    React. Dashboard is the root and owns the clock.
+/app           Next.js routes. / is the dashboard, /foundations the token set.
+/test          Plumbing tests. `npm test`.
 /styles        Design tokens, mirrored from Chris's Figma design system.
+/server        Later. Poller and fan-out for live. Not needed yet.
 /docs          Specification. 01 = source licensing, 02 = broadcast sync,
-               03 = device targets, 04 = replay and reveal.
+               03 = device targets, 04 = replay and reveal,
+               05 = build and deploy.
 /docs/archive  Superseded material. History, not instruction.
 ```
 

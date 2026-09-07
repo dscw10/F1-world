@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsc lib/*.ts test/*.ts --ignoreConfig --outDir .test-build --module commonjs --target es2022 --skipLibCheck --esModuleInterop --types node --lib es2022 && node .test-build/test/window.test.js",
+    "fixture": ".venv/bin/python pipeline/make_fixture.py"
   },
   "dependencies": {
     "next": "^16.3.4",

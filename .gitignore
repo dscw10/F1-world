@@ -24,3 +24,4 @@ pipeline/cache/
 # OS
 .DS_Store
 Thumbs.db
+.test-build/

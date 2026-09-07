@@ -1,9 +1,10 @@
 # F1 Live Race Dashboard — Project Context
 
 **Owner:** Chris
-**Status:** Scaffolded and deploying. Next.js static export → GitHub Pages at
-https://dscw10.github.io/F1-world/ . WP3 (design tokens) part-done with
-placeholder values. The product itself is not built.
+**Status:** WP1–WP6 built and deploying to https://dscw10.github.io/F1-world/ .
+Pipeline, windowed replay, analytics, dashboard and explorer all run — against
+a synthetic fixture, because this sandbox has no network route to F1's servers.
+The real export has never been run; see `pipeline/README.md`.
 **Last updated:** 7 September 2026
 
 **Purpose of this file:** the single source of truth for what this project is,
@@ -484,12 +485,12 @@ altitude is more accurate than any public elevation model.
 | WP | What | Done when |
 |---|---|---|
 | **WP0** | Product brief: screens, the three moments, onboarding | The design questions in §8 are answered |
-| **WP1** | Archive pipeline. FastF1 → normalised session model, one race | A known race exports and its finishing order, gaps and lap times match the official result |
-| **WP2** | Analytics: gaps, micro-sectors, pace/degradation, event detection — **each written against a prefix, never the whole race** | Each verified against the real outcome, *and* each produces the right answer when given only the first N laps |
+| **WP1** | Archive pipeline. FastF1 → normalised session model, one race | A known race exports and its finishing order, gaps and lap times match the official result  — **WRITTEN, never run against real data — no network route from the sandbox** |
+| **WP2** | Analytics: gaps, micro-sectors, pace/degradation, event detection — **each written against a prefix, never the whole race** | Each verified against the real outcome, *and* each produces the right answer when given only the first N laps  — **BUILT, plumbing verified; correctness still ungated** |
 | **WP3** | Design system as code, from Chris's Figma system | Every token referenced by name; none inlined. **Part-done** — structure built, values are placeholders pending the Figma file |
-| **WP4** | **The clock and windowed replay** | A finished race plays at 1×, nothing later than the clock is reachable, and the flag unlocks the whole race |
-| **WP5** | The dashboard on replayed data, driver-centric | Each of §3's three moments is served, Glance first |
-| **WP6** | The explorer, in the finished state | A viewer builds a query nobody anticipated and gets a correct answer or an explained refusal |
+| **WP4** | **The clock and windowed replay** | A finished race plays at 1×, nothing later than the clock is reachable, and the flag unlocks the whole race  — **BUILT and tested** |
+| **WP5** | The dashboard on replayed data, driver-centric | Each of §3's three moments is served, Glance first  — **BUILT** |
+| **WP6** | The explorer, in the finished state | A viewer builds a query nobody anticipated and gets a correct answer or an explained refusal  — **BUILT** |
 | **WP7** | 3D circuit: racing line, elevation, segment colour | Recognisable, every metre addressable |
 | **WP8** | Public readiness: onboarding, the phone layout, the two-hour session | A stranger on a tablet understands what they are looking at; the page survives two hours and a device sleep |
 | **WP9** | *Later:* server — poller, fan-out, cache, delay buffer | Many browsers served from one upstream connection |
@@ -622,6 +623,16 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | Token values are placeholders, structured to Chris's system but not taken from it | The ramp shape, the 8-hue categorical palette, the sequential ramp, the 16px floor and the mono telemetry stack all follow what the archive records. The numbers are mine and are marked as such on the page. One edit to `styles/tokens.css` replaces them everywhere |
 | 2026-09-07 | The first page is scaffolding and says so on itself | It renders the tokens so WP3 has a feedback loop, and states the project status. A placeholder that looks finished invites the wrong conversation |
 | 2026-09-07 | Enabling GitHub Pages cannot be automated from the workflow — tried and rejected | `configure-pages` accepts `enablement: true`, but with the workflow's own token it fails with "Create Pages site failed. Resource not accessible by integration". Removed rather than left in, so the log carries one clear error instead of two. Recorded so it is not retried |
+| 2026-09-07 | **The window is the enforcement, not the rule** | "No analytic may read past the clock" was a rule people had to remember. `lib/window.ts` makes it structural: an analytic is handed a `SessionWindow` and there is no route from it back to the whole race. The future is not hidden, it is absent |
+| 2026-09-07 | **Running order comes from distance covered, not completed laps** | Ranking by lap count only changes the order when someone crosses the line, so an overtake into turn one would not appear for a whole lap — and lap one had no order at all, leaving the Glance moment with an empty panel. FastF1 carries distance as a measured channel, so this is read rather than derived. Schema bumped to v2 |
+| 2026-09-07 | **Found by screenshot: the classification vanished at the chequered flag** | A finished car has no telemetry sample, so building standings from cars currently on track emptied the table at exactly the moment the result matters. "Where is the car now" and "how far has it got" are different questions; conflating them is what broke it. `progress()` is now separate from `car()` |
+| 2026-09-07 | **Found by screenshot: every car was 1.5x off the road** | Scaling the fixture's racing line to a plausible length without scaling the car positions. Both now derive from one `circuit_point()`, so where a car is drawn and how far it has got cannot disagree — they are the same number |
+| 2026-09-07 | The fixture must pass the same gates the real export must pass | Its first circuit came out at 8.2 km, longer than Spa, and would have failed the pipeline's own lap-length check. A fixture that could not survive the real gates tests the app against conditions that cannot occur |
+| 2026-09-07 | Cars start staggered in DISTANCE, not in time | The first fixture staggered them by 1.2 s each, so the order filled in over the first ten seconds and read like a bug. A real grid has every car on track at t=0, spaced along the straight |
+| 2026-09-07 | Catmull-Rom for position, linear for speed, neither for brake and gear | At 2 Hz the samples are ~60 m apart and linear interpolation drives the car across the apex in a visible chord; a higher-degree polynomial overshoots on hairpins and throws it off the circuit. Brake and gear are discrete in the source, so interpolating them would produce a half-pressed pedal that never happened |
+| 2026-09-07 | The clock treats a long frame gap as a pause, not a fast-forward | A tablet propped beside a television locks itself. Advancing by the elapsed wall time on wake would skip however long it slept — on a two-hour session, most of the race |
+| 2026-09-07 | Playwright is not a dependency | It is genuinely useful for looking at the thing being built, and it would add a browser download to every CI run for something only used by hand. Installed ad hoc; `scripts/shot.mjs` says how |
+| 2026-09-07 | The explorer opens only at the flag | It belongs to Dig. While the race plays, "the median lap on hards" has an answer that changes under you; at the flag it is settled. This is the reveal rule made visible |
 | 2026-09-07 | **The published site deploys from `main`; working branches build but do not publish** | Chris's call. The `github-pages` environment restricts deployments to the default branch, which is separate from the Pages source setting and defaults on. Deploying from a working branch is rejected *before the job starts* — it waits, fails in about a second, and returns 404 for its logs because it never ran, so there is no error to find. An `if:` on the deploy job makes that state unreachable by accident, while the build and verification still run on every branch |
 
 ---

@@ -11,16 +11,19 @@ later.
 
 The measure of success is that real people find it useful during real races.
 
-## Status: scaffolded and deploying. The product itself is not built.
-
-The site builds to static files and publishes to GitHub Pages on every push:
+## Status: the replay works, on invented data
 
 **https://dscw10.github.io/F1-world/**
 
-What is deployed today is a **foundations page** — the project's status and the
-design tokens rendered on a real screen. It proves the build-and-deploy chain
-works and gives the token set somewhere to be argued with. It is scaffolding,
-and it says so on the page rather than pretending to be a product.
+A race plays in real time. The order, gaps, tyres and pace all update as it
+runs, and nothing later than the clock is reachable. Reach the flag and the
+explorer opens, where you can ask your own questions of the race.
+
+**Every figure is invented.** The page says so. This sandbox has no network
+route to F1's servers, so the data is a synthetic fixture and the real export
+has never been run — see `pipeline/README.md` for what that takes.
+
+`/foundations` shows the design token set on a real screen.
 
 An earlier version of this project was built during August 2026, but its code
 was never committed here and the project was deliberately restarted on
@@ -40,6 +43,8 @@ npm run dev          # http://localhost:3000
 | `npm run dev` | Development server, hot reload |
 | `npm run build` | Production build into `./out` |
 | `npm run typecheck` | Type check without building |
+| `npm test` | Windowing, clock and analytics plumbing tests |
+| `npm run fixture` | Regenerate the synthetic development session |
 
 Deploys happen automatically on every push to the development branch. GitHub
 Pages is enabled with **Source: GitHub Actions**; see
@@ -56,6 +61,7 @@ Pages is enabled with **Source: GitHub Actions**; see
 | `docs/03-device-targets.md` | Tablet first, then laptop, then phone — and what that rules out |
 | `docs/04-replay-and-reveal.md` | Archive-first, windowed replay, and why that order de-risks live |
 | `docs/05-build-and-deploy.md` | How the site builds and publishes, and two failure modes designed out |
+| `pipeline/README.md` | How to export a real race, and what the export refuses to publish |
 | `docs/archive/2026-08-build-log.md` | The abandoned build's log, verbatim. History, not instruction — it describes Cesium, a weather layer and a post-race framing, all of which are superseded |
 
 The findings worth keeping from that archive are carried forward, curated, into
