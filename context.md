@@ -1,7 +1,9 @@
 # F1 Live Race Dashboard — Project Context
 
 **Owner:** Chris
-**Status:** Definition. No code exists. Restarted clean 2026-09-07.
+**Status:** Scaffolded and deploying. Next.js static export → GitHub Pages at
+https://dscw10.github.io/F1-world/ . WP3 (design tokens) part-done with
+placeholder values. The product itself is not built.
 **Last updated:** 7 September 2026
 
 **Purpose of this file:** the single source of truth for what this project is,
@@ -455,17 +457,19 @@ blockers by deferring them with the live transport.
 Nothing is built. This is intent, not description.
 
 ```
+/app           Next.js routes.                              EXISTS
+/styles        tokens.css (source of truth), globals.css.   EXISTS
+/docs          Specification.                               EXISTS
+/.github       Build-and-deploy workflow.                   EXISTS
 /pipeline      Python. Archive extraction via FastF1 → normalised JSON.
-               Offline, never on the request path.
-/server        The poller and fan-out. One connection to the source, many
-               clients. Owns the delay buffer and the session cache.
-/app           Next.js routes.
 /components    React. /scene is the Three.js scene; /ui is DOM chrome.
 /lib           types.ts (the data contract), analytics, explorer, clock.
-/styles        Design tokens, mirrored from Chris's Figma system.
-/docs          Specification.
+/server        Later. Poller and fan-out for live only.
 /docs/archive  Superseded material, kept verbatim.
 ```
+
+**Stack as built:** Node 22 · Next 16.3 · React 19.2 · TypeScript 7. Static
+export (`output: 'export'`), no server. See `docs/05-build-and-deploy.md`.
 
 **Rendering: Three.js, not Cesium.** Carried forward. Cesium cost 4.7 MB of
 JavaScript, an account token and runtime tile requests for one job.
@@ -482,7 +486,7 @@ altitude is more accurate than any public elevation model.
 | **WP0** | Product brief: screens, the three moments, onboarding | The design questions in §8 are answered |
 | **WP1** | Archive pipeline. FastF1 → normalised session model, one race | A known race exports and its finishing order, gaps and lap times match the official result |
 | **WP2** | Analytics: gaps, micro-sectors, pace/degradation, event detection — **each written against a prefix, never the whole race** | Each verified against the real outcome, *and* each produces the right answer when given only the first N laps |
-| **WP3** | Design system as code, from Chris's Figma system | Every token referenced by name; none inlined |
+| **WP3** | Design system as code, from Chris's Figma system | Every token referenced by name; none inlined. **Part-done** — structure built, values are placeholders pending the Figma file |
 | **WP4** | **The clock and windowed replay** | A finished race plays at 1×, nothing later than the clock is reachable, and the flag unlocks the whole race |
 | **WP5** | The dashboard on replayed data, driver-centric | Each of §3's three moments is served, Glance first |
 | **WP6** | The explorer, in the finished state | A viewer builds a query nobody anticipated and gets a correct answer or an explained refusal |
@@ -611,6 +615,12 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | **A replay is windowed while playing and fully unlocked at the flag** | Chris's call. Mirrors how a real race works, so the replay is not a different product, and it maps cleanly onto the three moments: Glance and Question are windowed, Dig belongs to the finished state |
 | 2026-09-07 | The server is deferred, not repealed | Archive data is static files a browser can fetch from static hosting, so the poller and fan-out are not needed until live is. Every word of §5.2 becomes true again the moment live arrives, so it is kept in full rather than deleted |
 | 2026-09-07 | **Nothing is blocking the build any more** | The last two blockers — where the server runs and whether OpenF1 charges for real-time — were both about live, and both moved to later with it |
+| 2026-09-07 | **Site scaffolded: Next.js static export to GitHub Pages, deployed by Actions on every push** | Follows directly from archive-first — with no live feed there is nothing to poll, so nothing needs to keep running. Free, no uptime to manage, cannot be rate-limited. The iteration cycle is push, two minutes, look at the URL |
+| 2026-09-07 | **Two archive constraints are dead and the workarounds must not return** | "Never upgrade to Next 16, it breaks the `@/` alias" was true only while the alias was webpack config for Cesium; the alias now comes from tsconfig and Turbopack reads it natively. "Pin TypeScript to ^5.7" was a Next 15 limit. Built and type-checked on Next 16.3 with TS 7. `npm install` also reports 0 vulnerabilities, so the whole npm-audit assessment in the archive is moot |
+| 2026-09-07 | The base path is read from the repository name at build time, never hardcoded | GitHub Pages serves a project repo from a sub-path, and getting it wrong produces a page that loads with every asset 404ing — which reads as broken CSS rather than wrong paths. Deriving it also means renaming the repository fixes itself, which matters because the name has to change |
+| 2026-09-07 | `public/.nojekyll` committed deliberately | Pages runs Jekyll, Jekyll ignores directories starting with an underscore, and Next puts everything in `_next`. Same symptom as the base-path bug, different cause, equally silent |
+| 2026-09-07 | Token values are placeholders, structured to Chris's system but not taken from it | The ramp shape, the 8-hue categorical palette, the sequential ramp, the 16px floor and the mono telemetry stack all follow what the archive records. The numbers are mine and are marked as such on the page. One edit to `styles/tokens.css` replaces them everywhere |
+| 2026-09-07 | The first page is scaffolding and says so on itself | It renders the tokens so WP3 has a feedback loop, and states the project status. A placeholder that looks finished invites the wrong conversation |
 
 ---
 

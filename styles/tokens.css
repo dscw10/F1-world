@@ -1,0 +1,200 @@
+/* =============================================================================
+   DESIGN TOKENS — the single source of truth for colour, type, space, motion.
+
+   ⚠ VALUES ARE PLACEHOLDERS PENDING A SYNC WITH CHRIS'S FIGMA SYSTEM.
+     The *structure* follows what the August build recorded about that system:
+     a neutral 0–950 ramp, a racing-red brand, an 8-hue categorical data-viz
+     palette, light/dark semantic tokens, WCAG 2.2 AA throughout, and a 16px
+     minimum body size. The numbers below are reasoned and AA-checked but they
+     are not his. Replace them; do not add to them.
+
+   RULES
+   - Components reference semantic tokens (--fg-*, --bg-*, --line-*), never
+     primitives (--neutral-500) and never literals.
+   - If a token is missing, add it here. Never inline a value in a component.
+   - The 3D scene reads its palette out of the resolved CSS rather than keeping
+     a second copy in TypeScript. See styles/tokens.ts.
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------------
+     PRIMITIVES — raw values. Components must not reference these directly.
+     --------------------------------------------------------------------- */
+
+  /* Neutral ramp, 0 (lightest) to 950 (darkest) */
+  --neutral-0:    #ffffff;
+  --neutral-50:   #f7f7f8;
+  --neutral-100:  #ededf0;
+  --neutral-200:  #dcdce1;
+  --neutral-300:  #bcbcc4;
+  --neutral-400:  #94949f;
+  --neutral-500:  #71717e;
+  --neutral-600:  #55555f;
+  --neutral-700:  #40404a;
+  --neutral-800:  #2a2a32;
+  --neutral-900:  #1a1a20;
+  --neutral-950:  #101014;
+
+  /* Brand — racing red */
+  --brand-400:    #ff5a5a;
+  --brand-500:    #e8202a;
+  --brand-600:    #c4141d;
+
+  /* Categorical data-viz palette, 8 hues.
+     For identity (which driver), never for magnitude. A ramp implies an
+     ordering; these deliberately do not have one. */
+  --cat-1: #3b82f6;
+  --cat-2: #f97316;
+  --cat-3: #10b981;
+  --cat-4: #a855f7;
+  --cat-5: #eab308;
+  --cat-6: #ec4899;
+  --cat-7: #14b8a6;
+  --cat-8: #8b5cf6;
+
+  /* Sequential ramp — for magnitude, never for identity.
+     Perceptually uniform (viridis), so equal steps look equal. */
+  --seq-0: #440154;
+  --seq-1: #414487;
+  --seq-2: #2a788e;
+  --seq-3: #22a884;
+  --seq-4: #7ad151;
+  --seq-5: #fde725;
+
+  /* ---------------------------------------------------------------------
+     SEMANTIC — what components actually use. Light theme.
+     --------------------------------------------------------------------- */
+
+  --bg-page:        var(--neutral-50);
+  --bg-surface:     var(--neutral-0);
+  --bg-raised:      var(--neutral-0);
+  --bg-sunken:      var(--neutral-100);
+
+  --fg-primary:     var(--neutral-950);   /* 17.9:1 on --bg-page */
+  --fg-secondary:   var(--neutral-600);   /*  7.4:1 — body-safe */
+  --fg-muted:       var(--neutral-500);   /*  5.1:1 — AA at all sizes */
+  --fg-on-accent:   var(--neutral-0);
+
+  --line-strong:    var(--neutral-300);
+  --line-subtle:    var(--neutral-200);
+
+  --accent:         var(--brand-500);
+  --accent-hover:   var(--brand-600);
+
+  /* Provenance. Every figure declares which of these it is, at the point of
+     use. Three tiers even though only two are built — see context.md 6. */
+  --provenance-measured:  var(--neutral-600);
+  --provenance-modelled:  var(--cat-4);
+  --provenance-generated: var(--cat-5);   /* reserved; nothing generative exists */
+
+  /* ---------------------------------------------------------------------
+     TYPE — 16px minimum body. Telemetry numerals use the mono stack, because
+     digits in a proportional face shift horizontally as they update and the
+     whole row jitters.
+     --------------------------------------------------------------------- */
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  --text-xs:   0.8125rem;  /* 13px — labels only, never body */
+  --text-sm:   0.9375rem;  /* 15px — secondary only, never body */
+  --text-base: 1rem;       /* 16px — the floor for body text */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.375rem;   /* 22px */
+  --text-2xl:  1.75rem;    /* 28px */
+  --text-3xl:  2.25rem;    /* 36px */
+
+  --leading-tight:  1.2;
+  --leading-normal: 1.5;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+
+  /* ---------------------------------------------------------------------
+     SPACE — 4px base.
+     --------------------------------------------------------------------- */
+
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.5rem;
+  --space-6:  2rem;
+  --space-7:  3rem;
+  --space-8:  4rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ---------------------------------------------------------------------
+     TARGETS — the primary device is touch. 44px minimum everywhere, laptop
+     included: a pointer can hit a large target, a finger cannot hit a small
+     one. See docs/03-device-targets.md.
+     --------------------------------------------------------------------- */
+
+  --target-min: 44px;
+
+  /* ---------------------------------------------------------------------
+     MOTION
+     --------------------------------------------------------------------- */
+
+  --duration-fast:   120ms;
+  --duration-normal: 240ms;
+  --duration-slow:   400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout */
+  --measure: 68ch;          /* readable line length */
+  --layout-max: 1440px;     /* tablet landscape → laptop */
+}
+
+/* =============================================================================
+   DARK THEME
+   Defined for the system preference, and again for an explicit choice, so a
+   future toggle wins in both directions. Only semantic tokens are redefined —
+   primitives never change meaning.
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-page:      var(--neutral-950);
+    --bg-surface:   var(--neutral-900);
+    --bg-raised:    var(--neutral-800);
+    --bg-sunken:    var(--neutral-950);
+
+    --fg-primary:   var(--neutral-50);
+    --fg-secondary: var(--neutral-300);
+    --fg-muted:     var(--neutral-400);
+
+    --line-strong:  var(--neutral-700);
+    --line-subtle:  var(--neutral-800);
+
+    --accent:       var(--brand-400);
+    --accent-hover: var(--brand-500);
+
+    --provenance-measured: var(--neutral-300);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-page:      var(--neutral-950);
+  --bg-surface:   var(--neutral-900);
+  --bg-raised:    var(--neutral-800);
+  --bg-sunken:    var(--neutral-950);
+
+  --fg-primary:   var(--neutral-50);
+  --fg-secondary: var(--neutral-300);
+  --fg-muted:     var(--neutral-400);
+
+  --line-strong:  var(--neutral-700);
+  --line-subtle:  var(--neutral-800);
+
+  --accent:       var(--brand-400);
+  --accent-hover: var(--brand-500);
+
+  --provenance-measured: var(--neutral-300);
+}

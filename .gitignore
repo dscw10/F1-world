@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Environment — ignore everything, re-allow only the template.
+# A secrets rule that only catches the filenames you predicted is not a rule.
+.env*
+!.env.example
+
+# Python (pipeline)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# FastF1 downloads its cache here; it is large and reproducible.
+pipeline/cache/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,73 @@
+name: Build and deploy
+
+# Builds the static site and publishes it to GitHub Pages.
+#
+# Runs on every push to the development branch, so the iteration cycle is:
+# push → about two minutes → look at the URL.
+#
+# `workflow_dispatch` adds a "Run workflow" button in the Actions tab, for
+# redeploying without pushing anything.
+
+on:
+  push:
+    branches:
+      - main
+      - claude/repo-exploration-bsv9r8
+  workflow_dispatch:
+
+# Pages deployment needs these. `id-token` is how the deploy step proves to
+# GitHub that it is this workflow, without a stored secret.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If two pushes land close together, let the first finish rather than cancelling
+# it — a half-deployed site is worse than a slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` installs exactly what package-lock.json specifies, rather than
+      # re-resolving versions. A build that passes here then fails on a later
+      # run because a dependency moved is a waste of everyone's afternoon.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          # GitHub Pages serves this repo at /F1-world/. Without the prefix the
+          # HTML loads and every asset 404s, which looks like broken CSS rather
+          # than a path problem. See next.config.mjs.
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

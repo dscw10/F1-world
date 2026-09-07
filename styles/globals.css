@@ -1,0 +1,73 @@
+@import "./tokens.css";
+
+/* Reset — deliberately small. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Tells the browser which themes we support, so form controls and
+     scrollbars match rather than staying stubbornly light. */
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, figure, blockquote {
+  margin: 0;
+}
+
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* Every interactive element clears the touch minimum. The primary device has
+   no pointer. See docs/03-device-targets.md. */
+button, a[role="button"], [role="tab"], input, select {
+  min-height: var(--target-min);
+  font: inherit;
+}
+
+/* A visible focus ring, always. Keyboard users on the laptop tier depend on it
+   and it costs the touch tiers nothing. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Telemetry numerals. Tabular figures so digits keep their column as they
+   update, rather than the row shifting under the eye. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

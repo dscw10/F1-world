@@ -1,0 +1,242 @@
+/* Tablet landscape is the design target: this page is laid out for ~1024px+
+   and reflows down. See docs/03-device-targets.md. */
+
+.page {
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-8);
+}
+
+.header {
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.eyebrow {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+.standfirst {
+  margin-top: var(--space-3);
+  font-size: var(--text-lg);
+  color: var(--fg-secondary);
+  max-width: var(--measure);
+}
+
+.section {
+  margin-top: var(--space-7);
+}
+
+.sectionTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line-subtle);
+  margin-bottom: var(--space-5);
+}
+
+.prose {
+  max-width: var(--measure);
+  color: var(--fg-secondary);
+}
+
+.prose + .prose {
+  margin-top: var(--space-4);
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  background: var(--bg-sunken);
+  padding: var(--space-4) var(--space-5);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  max-width: var(--measure);
+}
+
+/* --- Foundations display ------------------------------------------------ */
+
+.swatchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: var(--space-3);
+}
+
+.swatch {
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.swatchChip {
+  height: 56px;
+}
+
+.swatchLabel {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  line-height: 1.35;
+}
+
+.swatchName {
+  color: var(--fg-primary);
+  font-weight: var(--weight-medium);
+}
+
+.swatchMeta {
+  color: var(--fg-muted);
+}
+
+.ramp {
+  display: flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--line-subtle);
+}
+
+.rampStep {
+  flex: 1;
+  height: 56px;
+}
+
+.typeRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.typeMeta {
+  flex: 0 0 8.5rem;
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.typeSample {
+  color: var(--fg-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spaceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+}
+
+.spaceBar {
+  background: var(--accent);
+  height: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.target:hover {
+  border-color: var(--accent);
+}
+
+.provenanceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.provenance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.provenanceDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.statusList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: var(--measure);
+}
+
+.statusItem {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.statusKey {
+  flex: 0 0 5.5rem;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.statusValue {
+  color: var(--fg-secondary);
+}
+
+.footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line-strong);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  max-width: var(--measure);
+}
+
+/* Phone: a reduced layout, not the same one squeezed. */
+@media (max-width: 640px) {
+  .page {
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .title {
+    font-size: var(--text-2xl);
+  }
+  .typeRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+  .typeMeta {
+    flex: none;
+  }
+  .statusItem {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+}
