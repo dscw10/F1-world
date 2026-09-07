@@ -110,6 +110,17 @@ bare unstyled page with no error.
 
 Handled by `public/.nojekyll`, which Next copies into `out/`.
 
+### Both are now checked in CI
+
+A **Verify build output** step runs after the build and fails the run if
+`index.html` is missing, `.nojekyll` is missing, assets are not prefixed with
+the base path, or no stylesheet was emitted.
+
+Without it, either failure ships silently — the deploy succeeds and the page is
+simply unstyled. This is the "refuse rather than mislead" rule applied to the
+build itself: it is better for the run to go red than for a broken page to go
+live looking deliberate.
+
 ---
 
 ## Commands

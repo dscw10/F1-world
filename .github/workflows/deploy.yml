@@ -56,6 +56,32 @@ jobs:
           # than a path problem. See next.config.mjs.
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
 
+      # Guards the two silent failure modes in docs/05. Both would otherwise
+      # ship a page that loads with no styling and no error, which is the
+      # class of bug this project keeps recording. Fail loudly here instead.
+      - name: Verify build output
+        run: |
+          set -euo pipefail
+          BASE="/${{ github.event.repository.name }}"
+
+          test -f out/index.html || { echo "::error::out/index.html missing"; exit 1; }
+
+          # Jekyll ignores directories starting with an underscore, and every
+          # Next asset lives in /_next.
+          test -f out/.nojekyll || {
+            echo "::error::out/.nojekyll missing — GitHub Pages will drop /_next and serve an unstyled page"; exit 1; }
+
+          # Assets must carry the sub-path prefix or every one of them 404s
+          # while the HTML loads fine.
+          grep -q "href=\"$BASE/_next/" out/index.html || {
+            echo "::error::assets are not prefixed with $BASE — every stylesheet and script will 404"; exit 1; }
+
+          # A stylesheet must actually have been emitted.
+          grep -q 'rel="stylesheet"' out/index.html || {
+            echo "::error::no stylesheet in out/index.html"; exit 1; }
+
+          echo "Build output verified: index.html, .nojekyll, and assets prefixed with $BASE"
+
       # Pages must already be enabled for the repository, with Source set to
       # "GitHub Actions" (Settings → Pages). `enablement: true` was tried and
       # does NOT work here: the workflow token cannot create a Pages site
