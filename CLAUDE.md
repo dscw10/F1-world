@@ -40,10 +40,15 @@ I am a UX/HMI specialist, not a developer. Therefore:
 - **A measured or modelled value never routes through a language model.** A
   model may discuss those numbers; it may never compute or restate them. This
   is what the product's checkability rests on.
-- **Never spoil the viewer's broadcast.** Timing data arrives ahead of the
-  picture the user is watching. Nothing in the interface may reveal an event
-  before their screen does. See `context.md` §5.3 — the stance is still open,
-  but the constraint is not.
+- **Never spoil the viewer without their informed choice.** Timing data arrives
+  ahead of the picture the user is watching. The default is the live edge, so
+  the delay choice must be offered once, clearly, before the first session —
+  never buried in settings. See `context.md` §5.3 and `docs/02-broadcast-sync.md`.
+- **The clock is an abstraction with a settable origin, from the first line.**
+  Live, offset and broadcast sync are one mechanism. Hardwiring live to
+  `Date.now()` turns the other two into a rewrite.
+- **Delay buffering belongs in the transport layer.** No analytic and no
+  component may see data the interface has not yet shown.
 - **The analytics layer must not know which transport fed it.** Live and archive
   data normalise to one model. An analytic that reads the live feed directly is
   a bug.
@@ -68,8 +73,9 @@ I am a UX/HMI specialist, not a developer. Therefore:
 ## Stack
 
 Next.js (React) · Three.js · Python + FastF1 (offline archive pipeline) · live
-transport **undecided** — see `context.md` §5.2, and do not pick one
-unilaterally.
+transport **undecided** — see `context.md` §5.2 and `docs/01-live-source-licensing.md`.
+Do not pick one unilaterally: it is a licensing decision as much as a technical
+one, and no candidate is both unrestricted and rich enough.
 
 ## Repo layout
 
@@ -80,7 +86,7 @@ unilaterally.
 /components    React. /scene is the Three.js scene; /ui is DOM chrome.
 /lib           types.ts (the data contract), analytics, explorer, interpolation.
 /styles        Design tokens, mirrored from Chris's Figma design system.
-/docs          Specification.
+/docs          Specification. 01 = live-source licensing, 02 = broadcast sync.
 /docs/archive  Superseded material. History, not instruction.
 ```
 

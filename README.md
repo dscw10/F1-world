@@ -23,6 +23,8 @@ not exist in this repository.
 |---|---|
 | `context.md` | **Start here.** Scope, decisions, open questions. The source of truth |
 | `CLAUDE.md` | Project instructions, read automatically by Claude Code |
+| `docs/01-live-source-licensing.md` | Which live data sources exist, what each licence permits, and whether a paid tier is possible |
+| `docs/02-broadcast-sync.md` | Time, delay, and the three clock modes |
 | `docs/archive/2026-08-build-log.md` | The abandoned build's log, verbatim. History, not instruction — it describes Cesium, a weather layer and a post-race framing, all of which are superseded |
 
 The findings worth keeping from that archive are carried forward, curated, into
@@ -34,9 +36,18 @@ Decided: the product is a live race dashboard; rendering is Three.js; the 3D
 scene covers the racing line and its real elevation and nothing else; measured
 figures never route through a language model.
 
-**Not decided, and blocking:** which live data source to use, whether a paid
-tier on F1-derived data is commercially viable, and how the interface avoids
-spoiling the viewer's broadcast. These are in `context.md` §8 and need answering
-before the live half of the product can be built.
+Also decided: how the interface handles broadcast delay — three clock modes,
+defaulting to the live edge, with a broadcast-sync mode that replays a finished
+race in step with the viewer's own screen.
+
+**Not decided, and blocking the live half:** which data source to use, and
+whether a paid tier on F1-derived data is possible at all. No candidate source
+is both free of commercial restriction and rich enough — OpenF1 is
+non-commercial, and the sources you can buy may not carry telemetry. See
+`docs/01-live-source-licensing.md`.
+
+None of this blocks the build. The archive pipeline, the analytics, the
+dashboard, the explorer and the 3D circuit all run on data from a race that
+finished two years ago.
 
 This file will describe how to run the thing once there is a thing to run.

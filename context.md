@@ -175,40 +175,69 @@ require a race to be running. Every analytic can be verified against a race
 whose real outcome is already known — which is exactly how the previous build
 caught its worst bugs.
 
-### 5.2 Candidate live sources — unresolved
+### 5.2 Candidate live sources — researched 2026-09-07, still unresolved
 
-| Source | What it gives | Concerns |
-|---|---|---|
-| **OpenF1** | Free HTTP API with live endpoints: positions, intervals, laps, radio, pit | Community-run. No SLA. Terms and commercial use need reading before any paid tier is built on it |
-| **F1 live timing stream** | The official feed the broadcast uses. Richest and lowest latency | Access is unofficial. Legally and contractually the riskiest option, especially commercially |
-| **FastF1 live timing recorder** | Records the live stream to disk during a session | A recorder, not a served API. Useful for capturing test data; not a serving layer |
+Full findings and sourcing in `docs/01-live-source-licensing.md`. Summary:
 
-**None of these is chosen.** This decision gates the entire live half of the
-product and it is as much a legal question as a technical one. See §8.
+| Source | Terms | Live | Telemetry | Paid product allowed |
+|---|---|---|---|---|
+| **OpenF1** | CC BY-NC-SA 4.0 | Yes | Yes | **No** — NonCommercial *and* ShareAlike |
+| **FastF1** | MIT — the *software*, not the data | Recorder only | Yes | Software yes, data no |
+| **jolpica-f1** | Apache 2.0 | No | No | Not a live source |
+| **F1 official stream** | F1's own terms | Yes | Yes | **No** without a licence |
+| **Sportmonks** | Commercial, ~€79/mo | Yes | Depth unverified | Yes |
+| **Hyprace** | Commercial, from ~$7.99/mo | Partial | No | Yes |
 
-### 5.3 The broadcast delay problem
+**The finding that matters:** legal comfort and product quality are inversely
+related. The high-rate telemetry this product is built on — position at ~10 Hz,
+speed, throttle, brake — exists in depth only in the sources that forbid
+commercial use. The sources you can straightforwardly pay for and resell supply
+timing and classification, which is roughly what Apple TV already gives away.
 
-Timing data generally reaches a client **at or before** the moment the viewer
-sees the corresponding action, and streaming viewers can be many seconds further
-behind again. The practical result: a live dashboard routinely reveals events
-before its own user's television shows them.
+So licensing is not a formality to clear on the way to building. It partly
+determines what the product can be.
 
-This is not an edge case. It is the defining UX constraint of every second-screen
-racing product, and it can make the product actively unpleasant — a crash or a
-pass spoiled by a panel updating early.
+**Load-bearing unknown:** whether any commercially licensed provider sells
+telemetry at the depth the analytics need. If not, the option of buying a clean
+licence and keeping the product intact does not exist. Both providers offer free
+tiers, so this is an afternoon's work and should happen before any other
+licensing effort.
 
-Directions worth considering, none decided:
+### 5.3 Broadcast delay — decided
 
-- A **viewer-set delay offset**, with an easy calibration gesture ("tap when you
-  see the lights go out")
-- A **spoiler-safe default**: the dashboard trails deliberately, and surfacing
-  the live edge is an explicit, opt-in act
-- **Tiering by spoiler risk**: continuous state (gaps, pace, tyre age) updates
-  freely; discrete events (passes, incidents, retirements) are held behind the
-  offset
+Timing data reaches a client at or before the moment the viewer sees the action
+on television, and streaming viewers are further behind again. Left alone, the
+dashboard spoils its own user during the event it exists to enhance.
 
-The measured size of the delay must be established empirically during a real
-session rather than asserted. Recorded as an open decision.
+**Decided 2026-09-07 (Chris).** Three modes on one mechanism — a clock with a
+variable time origin. Detail in `docs/02-broadcast-sync.md`.
+
+| Mode | Time origin | Pausable | Default |
+|---|---|---|---|
+| **Live edge** | Wall clock, zero offset | No | **Yes** |
+| **Offset** | Wall clock minus a user-set delay | No | — |
+| **Broadcast sync** | A moment the user marks | **Yes** | — |
+
+Offset is set by a calibration gesture — the user taps when they see the lights
+go out — rather than by understanding a number. **Broadcast sync** replays a
+finished session as though live, started when the user's own broadcast starts
+and pausable when they pause their television.
+
+**Broadcast sync is architecturally load-bearing, not an accommodation.** It is
+the same clock with a different origin, so it costs almost nothing *if the clock
+is an abstraction from the start* — and it returns the demonstrable-on-any-day
+property that §2 records the live pivot as having cost. It also makes the live UI
+testable without waiting for a race, which is otherwise possible about
+twenty-four times a year.
+
+**The cost of defaulting to zero, stated:** the product spoils people by default.
+This is a deliberate exception to the never-spoil constraint, resolved as *never
+spoil the viewer without their informed choice*. It places a hard requirement on
+onboarding — the delay choice is presented once, clearly, before the first
+session, never buried in settings.
+
+**Buffering belongs in the transport layer, below the analytics.** No analytic
+and no component may see data the interface is not yet showing.
 
 ### 5.4 What can be measured, and at what confidence
 
@@ -296,13 +325,21 @@ Ordered by how much they block.
 
 **Blocking the live half:**
 
-- [ ] **Which live source.** OpenF1, the official stream, or something else.
-      Technical *and* legal. Nothing live can be built until this lands (§5.2)
-- [ ] **Whether a paid tier on F1-derived data is viable.** Licensing,
-      the chosen source's terms, and what "commercial use" means for each. This
-      should be answered before engineering effort is spent on billing
-- [ ] **The broadcast-delay stance.** Offset control, spoiler-safe default, or
-      event tiering (§5.3). A design decision, and Chris's to make
+- [ ] **Whether any licensed provider sells telemetry at the depth we need.**
+      The load-bearing unknown. Both Sportmonks and Hyprace offer free tiers, so
+      this is an afternoon's work and it collapses or confirms two of the four
+      options below. **Do this first**
+- [ ] **Which live source.** Researched 2026-09-07 (`docs/01-live-source-licensing.md`).
+      OpenF1 is CC BY-NC-SA — non-commercial and ShareAlike — so it cannot carry a
+      paid tier without a negotiated licence. FastF1's MIT licence covers the
+      software, not the data. The licensed resellers permit commerce but may not
+      carry telemetry. No option is both free of restriction and rich enough yet
+- [ ] **Whether a paid tier on F1-derived data is viable at all**, and under
+      which of the four routes. Needs a solicitor before money changes hands —
+      the five questions to put to them are in `docs/01-live-source-licensing.md` §6
+- [x] ~~**The broadcast-delay stance.**~~ **Decided 2026-09-07.** Three modes on
+      one clock: live edge (default, zero offset), user-set offset, and broadcast
+      sync. See §5.3 and `docs/02-broadcast-sync.md`
 
 **Blocking the build order:**
 
@@ -313,6 +350,10 @@ Ordered by how much they block.
       strategies, a one-stop that leads at the flag, a disqualification
 - [ ] **Whether phone is a first-class target.** "Second screen" implies a phone
       far more than the old desktop-first brief did
+- [ ] **The product's name.** It cannot contain "F1" or "Formula 1" if it is
+      sold — F1 enforces this against creators, and trade mark is far more
+      clear-cut than database right. Cheap to change now; expensive later.
+      This repository is currently called `F1-world`
 
 **Blocking the AI tier:**
 
@@ -461,6 +502,15 @@ are binding on anything new. The unabridged log is in
 | 2026-09-07 | Three.js retained over Cesium | Carried forward. Cesium cost 4.7 MB, an account token and runtime tile requests for one job. Nothing in the new direction changes that |
 | 2026-09-07 | Weather stays cut | Removed in August as unsuited to an analysis tool. A live dashboard has a stronger case for it than the analysis piece did, but not one strong enough to reinstate now |
 | 2026-09-07 | Broadcast delay recorded as a first-class design problem, not an implementation detail | A live dashboard reveals events before its own user's television shows them. It can make the product unpleasant to use during the exact event it exists for |
+| 2026-09-07 | **Live-source licensing researched. No option is both unrestricted and rich enough** | OpenF1 is CC BY-NC-SA 4.0 — NonCommercial *and* ShareAlike, verified at source — so it cannot carry a paid tier as licensed. FastF1 is MIT, but that licenses the client, not the data it fetches. The commercial resellers permit selling and may not carry telemetry. See `docs/01-live-source-licensing.md` |
+| 2026-09-07 | **Recorded: legal comfort and product quality are inversely related here** | The ~10 Hz telemetry the explorer and every spatial layer depend on exists in depth only in the sources that forbid commercial use. The sources that can be bought and resold carry timing and classification — roughly what Apple TV already gives away free. Licensing is therefore a product question, not a formality |
+| 2026-09-07 | Licensing decision deferred to WP7/WP9, and the build is not waiting for it | WP1–WP6 run entirely on archive data for a finished race with nothing being sold, so they carry no commercial exposure. Deciding later means deciding with evidence about whether the product is worth licensing, which is also a better negotiating position |
+| 2026-09-07 | **Recorded: F1's rights claim is broader than the law may support, and it does not matter much** | *BHB v William Hill* held that database right does not subsist where investment went into creating the contents rather than obtaining them — which is F1's own fact pattern. But contract binds regardless of IP, trade mark is clear-cut, and "contestable" means an argument a solo product cannot afford to have. Recorded so nobody re-derives it as a green light |
+| 2026-09-07 | **Broadcast delay: three modes on one clock. Live edge is the default** | Chris's call. Live edge (zero offset), user-set offset, and broadcast sync. Offset is set by tapping when the lights go out rather than by understanding a number |
+| 2026-09-07 | **Broadcast sync is treated as architecture, not an accommodation** | It is the same clock with a user-marked origin instead of the wall clock, so it is nearly free *if the clock is an abstraction from the start* and a rewrite if live is hardwired to the wall clock. It returns the demonstrable-on-any-day property the live pivot cost, makes the live UI testable without waiting for a race, and is the only mode in which pause is possible |
+| 2026-09-07 | Defaulting to zero delay is a deliberate exception to the never-spoil rule | The constraint becomes *never spoil the viewer without their informed choice*, which puts a hard requirement on onboarding: the delay choice is presented once, clearly, before the first session, never buried in settings |
+| 2026-09-07 | Delay buffering lives in the transport layer, below the analytics | An analytic that can see data the interface has not yet shown will eventually leak it |
+| 2026-09-07 | Recorded: the product cannot ship under a name containing "F1" | Trade mark is the clearest exposure of the three and F1 actively enforces it against creators. This repository is called `F1-world` |
 
 ---
 
